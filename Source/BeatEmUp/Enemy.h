@@ -22,11 +22,11 @@ protected:
 
 public:
 	UPROPERTY()
-	ABeatEmUpCharacter* Player;
+		ABeatEmUpCharacter* Player;
 	UPROPERTY(EditAnywhere)
-	float MaxHealth = 100;
+		float MaxHealth = 100;
 	UPROPERTY(EditAnywhere)
-	float CurrentHealth = MaxHealth;
+		float CurrentHealth = MaxHealth;
 	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -37,5 +37,5 @@ public:
 	void DealDamage(float Damage);
 
 	UFUNCTION()
-	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector Normal, const FHitResult& Hit);
+		void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector Normal, const FHitResult& Hit);
 };

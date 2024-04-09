@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Enemy.h"
 #include "GameFramework/Actor.h"
 #include "EnemySpawner.generated.h"
 
@@ -23,4 +24,17 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<AEnemy> EnemyClass;
+	UPROPERTY(EditAnywhere)
+		float SpawnFrequency = 1;
+	UPROPERTY(EditAnywhere)
+		int MaxEnemies = 10;
+	UPROPERTY(EditAnywhere)
+		float SpawnRadius = 1000;
+
+	FTimerHandle SpawnTimerHandle;
+
+	UFUNCTION()
+		void SpawnEnemy();
 };
