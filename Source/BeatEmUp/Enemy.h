@@ -27,6 +27,13 @@ public:
 		float MaxHealth = 100;
 	UPROPERTY(EditAnywhere)
 		float CurrentHealth = MaxHealth;
+
+	UPROPERTY(EditAnywhere)
+		float DamageToPlayer = 10;
+	UPROPERTY(EditAnywhere)
+		float RagdollTime = 5;
+	FTimerHandle RagdollTimerHandle;
+	
 	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -35,7 +42,10 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	void DealDamage(float Damage);
-
 	UFUNCTION()
 		void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector Normal, const FHitResult& Hit);
+
+	void Ragdoll();
+	UFUNCTION()
+	void StopRagdoll();
 };

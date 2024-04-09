@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
+#include "Windows/AllowWindowsPlatformTypes.h"
 #include "BeatEmUpCharacter.generated.h"
 
 class USpringArmComponent;
@@ -44,6 +45,10 @@ class ABeatEmUpCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* LookAction;
 
+	/** Punch Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* PunchAction;
+
 public:
 	ABeatEmUpCharacter();
 	
@@ -55,6 +60,9 @@ protected:
 
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
+
+	bool bPunchReady = true;
+	FTimerHandle PunchTimerHandle;
 			
 
 protected:
@@ -69,5 +77,25 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+	UPROPERTY(EditAnywhere)
+		float MaxHealth = 100;
+	UPROPERTY(EditAnywhere)
+		int CurrentHealth = MaxHealth;
+	UPROPERTY(EditAnywhere)
+		float PunchDistance = 250;
+	UPROPERTY(EditAnywhere)
+		float PunchForce = 50000;
+	UPROPERTY(EditAnywhere)
+		float PunchDamage = 50;
+	UPROPERTY(EditAnywhere)
+		float PunchCooldown = 1;
+
+
+	UFUNCTION()
+		void Punch();
+	UFUNCTION()
+		void ResetPunch();
+	void DealDamage(float Damage);
 };
 

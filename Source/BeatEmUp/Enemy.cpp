@@ -49,6 +49,29 @@ void AEnemy::DealDamage(float Damage) {
 
 void AEnemy::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector Normal,
 	const FHitResult& Hit) {
-	if(OtherActor == Player) Destroy();
+	if(OtherActor != Player) return;
+	
+	Player->DealDamage(DamageToPlayer);
+	Destroy();
 }
 
+void AEnemy::Ragdoll() {
+	GetMesh()->SetCollisionProfileName("Ragdoll");
+	GetMesh()->SetSimulatePhysics(true);
+	GetCapsuleComponent()->SetCollisionProfileName("NoCollision");
+	GetWorld()->GetTimerManager().SetTimer(RagdollTimerHandle, this, &AEnemy::StopRagdoll, RagdollTime, false);
+}
+
+void AEnemy::StopRagdoll() {
+	if(CurrentHealth <= 0) {
+		Destroy();
+		return;
+	}
+
+	GetMesh()->SetSimulatePhysics(false);
+	GetMesh()->SetCollisionProfileName("CharacterMesh");
+	GetCapsuleComponent()->SetWorldLocation(GetMesh()->GetSocketLocation("pelvis"));
+	GetMesh()->AttachToComponent(GetCapsuleComponent(), FAttachmentTransformRules::SnapToTargetIncludingScale);
+	GetMesh()->SetRelativeLocationAndRotation(FVector(0, 0, -90), FRotator(0, -90, 0));
+	GetCapsuleComponent()->SetCollisionProfileName("Pawn");
+}
