@@ -49,6 +49,10 @@ class ABeatEmUpCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* PunchAction;
 
+	/** Use Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* UseAction;
+
 public:
 	ABeatEmUpCharacter();
 	
@@ -78,10 +82,13 @@ public:
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
+	// Health
 	UPROPERTY(EditAnywhere)
 		float MaxHealth = 100;
 	UPROPERTY(EditAnywhere)
 		int CurrentHealth = MaxHealth;
+	
+	// Punch
 	UPROPERTY(EditAnywhere)
 		float PunchDistance = 250;
 	UPROPERTY(EditAnywhere)
@@ -91,11 +98,17 @@ public:
 	UPROPERTY(EditAnywhere)
 		float PunchCooldown = 1;
 
+	// Use
+	UPROPERTY(EditAnywhere)
+		float UseDistance = 1000;
 
 	UFUNCTION()
 		void Punch();
 	UFUNCTION()
 		void ResetPunch();
+	UFUNCTION()
+		void Use();
+	
 	void DealDamage(float Damage);
 };
 
