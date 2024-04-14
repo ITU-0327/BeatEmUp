@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GrapplingHook.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "Windows/AllowWindowsPlatformTypes.h"
@@ -53,6 +54,10 @@ class ABeatEmUpCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* UseAction;
 
+	/** Grappling Input Action */
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+    UInputAction* GrapplingAction;
+
 public:
 	ABeatEmUpCharacter();
 	
@@ -83,31 +88,36 @@ public:
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
 	// Health
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="Character Settings")
 		float MaxHealth = 100;
 	UPROPERTY(EditAnywhere)
 		int CurrentHealth = MaxHealth;
 	
 	// Punch
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="Character Settings")
 		float PunchDistance = 250;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="Character Settings")
 		float PunchForce = 50000;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="Character Settings")
 		float PunchDamage = 50;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="Character Settings")
 		float PunchCooldown = 1;
-
-	// Use
-	UPROPERTY(EditAnywhere)
-		float UseDistance = 1000;
-
 	UFUNCTION()
 		void Punch();
 	UFUNCTION()
 		void ResetPunch();
+
+	// Use
+	UPROPERTY(EditAnywhere, Category="Character Settings")
+		float UseDistance = 1000;
 	UFUNCTION()
 		void Use();
+
+	// Grappling Hook
+	UPROPERTY(EditAnywhere, Category="Character Settings")
+		TSubclassOf<AGrapplingHook> GrapplingHookClass;
+	UFUNCTION()
+		void LaunchGrapplingHook();
 	
 	void DealDamage(float Damage);
 };

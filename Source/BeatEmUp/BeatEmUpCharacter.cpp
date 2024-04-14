@@ -11,6 +11,7 @@
 #include "GameFramework/Controller.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "GrapplingHook.h"
 #include "InputActionValue.h"
 #include "Interactable.h"
 // #include "Interactable.h"
@@ -171,6 +172,9 @@ void ABeatEmUpCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 		// Using
 		EnhancedInputComponent->BindAction(UseAction, ETriggerEvent::Started, this, &ABeatEmUpCharacter::Use);
+
+		// Grappling
+		EnhancedInputComponent->BindAction(GrapplingAction, ETriggerEvent::Started, this, &ABeatEmUpCharacter::LaunchGrapplingHook);
 	}
 	else
 	{
@@ -212,4 +216,20 @@ void ABeatEmUpCharacter::Look(const FInputActionValue& Value)
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
+}
+
+void ABeatEmUpCharacter::LaunchGrapplingHook() {
+	FVector Start = GetActorLocation();
+	FVector End = Start + GetFollowCamera()->GetForwardVector() * 1000;
+
+	FHitResult HitData;
+	FCollisionQueryParams TraceParams;
+	TraceParams.AddIgnoredActor(this);
+	bool bHit = GetWorld()->LineTraceSingleByChannel(HitData, Start, End, ECC_Visibility, TraceParams);
+
+	if(!bHit) return;
+	if(HitData.GetActor() == nullptr) return;
+
+	if(AGrapplingHook* GrapplingHook = GetWorld()->SpawnActor<AGrapplingHook>(GrapplingHookClass, Start, FRotator::ZeroRotator))
+		GrapplingHook->Launch(HitData.ImpactPoint, this);
 }
