@@ -4,8 +4,7 @@
 #include "GrapplingHook.h"
 
 // Sets default values
-AGrapplingHook::AGrapplingHook()
-{
+AGrapplingHook::AGrapplingHook() {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -29,14 +28,14 @@ void AGrapplingHook::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	if(!bRetracting) {
-		SetActorLocation(FMath::VInterpConstantTo(GetActorLocation(), TargetLocation, DeltaTime, 1500.0f));
-		if(FVector::Dist(GetActorLocation(), TargetLocation) < 100.f)
+		SetActorLocation(FMath::VInterpConstantTo(GetActorLocation(), TargetLocation, DeltaTime, FlyingSpeed));
+		if(FVector::Dist(GetActorLocation(), TargetLocation) < AttachThreshold)
 			bRetracting = true;
 	}
 	else {
-		FVector Direction = (Initiator->GetActorLocation() - GetActorLocation()).GetSafeNormal() * 1500.0f;
+		FVector Direction = (Initiator->GetActorLocation() - GetActorLocation()).GetSafeNormal() * FlyingSpeed;
 		SetActorLocation(GetActorLocation() + Direction * DeltaTime);
-		if(FVector::Dist(GetActorLocation(), Initiator->GetActorLocation()) < 100.f)
+		if(FVector::Dist(GetActorLocation(), Initiator->GetActorLocation()) < AttachThreshold)
 			Destroy();
 	}
 }

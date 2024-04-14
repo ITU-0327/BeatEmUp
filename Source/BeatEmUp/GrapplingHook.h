@@ -23,6 +23,11 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "Components")
 		UStaticMeshComponent* HookMesh;
+	UPROPERTY(EditAnywhere, Category="Grappling Hook Setting")
+		float FlyingSpeed = 500.0f;
+	UPROPERTY(EditAnywhere, Category="Grappling Hook Setting")
+		float AttachThreshold = 100.f;
+	
 
 	UPROPERTY()
 		AActor* Initiator;
