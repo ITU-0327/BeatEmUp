@@ -8,13 +8,25 @@ AGrapplingHook::AGrapplingHook() {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	HookMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Hook Mesh"));
-	RootComponent = HookMesh;
+	RootComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Hook Mesh"));
+	CableComponent = CreateDefaultSubobject<UCableComponent>(TEXT("Cable"));
+	
+	CableComponent->SetupAttachment(RootComponent);
+	CableComponent->SetVisibility(true);
+
+	CableComponent->CableLength = 1000;
+	CableComponent->NumSegments = 24;
+	CableComponent->CableWidth = 10;
 }
 
 void AGrapplingHook::Launch(const FVector& NewTargetLocation, AActor* NewInitiator) {
 	TargetLocation = NewTargetLocation;
 	Initiator = NewInitiator;
+	
+	if(Initiator == nullptr) return;
+	if(CableComponent == nullptr) return;
+
+	CableComponent->SetAttachEndToComponent(Initiator->GetRootComponent());
 }
 
 // Called when the game starts or when spawned
