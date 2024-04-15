@@ -118,6 +118,8 @@ public:
 		TSubclassOf<AGrapplingHook> GrapplingHookClass;
 	UPROPERTY(EditAnywhere, Category="Character Settings")
 		float VisionDistance = 3000;
+	bool bIsGrappling = false;
+	
 	UFUNCTION()
 		void LaunchGrapplingHook();
 	

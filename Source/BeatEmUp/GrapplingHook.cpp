@@ -3,6 +3,8 @@
 
 #include "GrapplingHook.h"
 
+#include "BeatEmUpCharacter.h"
+
 // Sets default values
 AGrapplingHook::AGrapplingHook() {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -47,7 +49,10 @@ void AGrapplingHook::Tick(float DeltaTime)
 	else {
 		FVector Direction = (Initiator->GetActorLocation() - GetActorLocation()).GetSafeNormal() * FlyingSpeed;
 		SetActorLocation(GetActorLocation() + Direction * DeltaTime);
-		if(FVector::Dist(GetActorLocation(), Initiator->GetActorLocation()) < AttachThreshold)
+		if(FVector::Dist(GetActorLocation(), Initiator->GetActorLocation()) < AttachThreshold) {
+			if (ABeatEmUpCharacter* Character = Cast<ABeatEmUpCharacter>(Initiator))
+				Character->bIsGrappling = false;
 			Destroy();
+		}
 	}
 }

@@ -219,6 +219,11 @@ void ABeatEmUpCharacter::Look(const FInputActionValue& Value)
 }
 
 void ABeatEmUpCharacter::LaunchGrapplingHook() {
+	if (bIsGrappling) {
+		UE_LOG(LogTemp, Warning, TEXT("Already grappling!"));
+		return;
+	}
+	
 	FVector Start = GetActorLocation();
 	FVector End = Start + GetFollowCamera()->GetForwardVector() * VisionDistance;
 
@@ -237,6 +242,8 @@ void ABeatEmUpCharacter::LaunchGrapplingHook() {
 	FVector Direction = (HitData.ImpactPoint - Start).GetSafeNormal();
 	FRotator LaunchRotation = Direction.Rotation() + FRotator(-90.f, 0.f, 0.f);
 
-	if (AGrapplingHook* GrapplingHook = GetWorld()->SpawnActor<AGrapplingHook>(GrapplingHookClass, Start, LaunchRotation))
+	if (AGrapplingHook* GrapplingHook = GetWorld()->SpawnActor<AGrapplingHook>(GrapplingHookClass, Start, LaunchRotation)) {
 		GrapplingHook->Launch(HitData.ImpactPoint, this);
+		bIsGrappling = true;
+	}
 }
