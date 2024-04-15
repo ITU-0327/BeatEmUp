@@ -23,4 +23,26 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	UPROPERTY(EditAnywhere, Category="Components")
+		UStaticMeshComponent* Mesh;
+	UPROPERTY(EditAnywhere, Category="Granade Effect")
+		UParticleSystem* ExplosionEffect;
+	UPROPERTY(EditAnywhere, Category="Granade Effect")
+		USoundBase* ExplosionSound;
+	
+	UPROPERTY(EditAnywhere, Category="Granade Settings")
+		float ExplosionRadius = 300.f;
+	UPROPERTY(EditAnywhere, Category="Granade Settings")
+		float ExplosionForce = 2000.f;
+	UPROPERTY(EditAnywhere, Category="Granade Settings")
+		float TimeToExplode = 3.0f;
+	
+	UFUNCTION()
+		void Initialize(const FVector& ThrowDirection, bool bDebug);
+	UFUNCTION()
+		void Explode();
+
+private:
+	FTimerHandle TimerHandle_Explosion;
+	bool bEnableDebug;
 };

@@ -15,6 +15,7 @@
 #include "InputActionValue.h"
 #include "Interactable.h"
 #include "DrawDebugHelpers.h"
+#include "Grenade.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -192,6 +193,10 @@ void ABeatEmUpCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 		// Grappling
 		EnhancedInputComponent->BindAction(GrapplingAction, ETriggerEvent::Started, this, &ABeatEmUpCharacter::LaunchGrapplingHook);
+
+		// Throwing Grenade
+		EnhancedInputComponent->BindAction(PickUpAction, ETriggerEvent::Started, this, &ABeatEmUpCharacter::PickUpGrenade);
+		EnhancedInputComponent->BindAction(ThrowAction, ETriggerEvent::Started, this, &ABeatEmUpCharacter::ThrowGrenade);
 	}
 	else
 	{
@@ -284,4 +289,18 @@ void ABeatEmUpCharacter::StopGrapplingHook() {
 	bIsGrapplingHookActive = false;
 
 	GetCharacterMovement()->SetMovementMode(MOVE_Falling);
+}
+
+void ABeatEmUpCharacter::PickUpGrenade() {
+	bHasGrenade = true;
+}
+
+void ABeatEmUpCharacter::ThrowGrenade() {
+	if(!bHasGrenade) return;
+
+	bHasGrenade = false;
+	FVector ThrowDirection = GetFollowCamera()->GetForwardVector() + FVector::UpVector;
+	ThrowDirection *= ThrowForce;
+	if(AGrenade* Grenade = GetWorld()->SpawnActor<AGrenade>(GrenadeClass, GetActorLocation() + FVector(0, 0, 50), FRotator::ZeroRotator))
+		Grenade->Initialize(ThrowDirection, bEnableDebug);
 }
