@@ -14,8 +14,8 @@ AGrapplingHook::AGrapplingHook() {
 	CableComponent->SetupAttachment(RootComponent);
 	CableComponent->SetVisibility(true);
 
-	CableComponent->CableLength = 1000;
-	CableComponent->NumSegments = 24;
+	CableComponent->CableLength = 1;
+	CableComponent->NumSegments = 1;
 	CableComponent->CableWidth = 10;
 }
 
