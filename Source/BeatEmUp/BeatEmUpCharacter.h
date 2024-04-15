@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GrapplingHook.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "Windows/AllowWindowsPlatformTypes.h"
@@ -53,6 +54,10 @@ class ABeatEmUpCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* UseAction;
 
+	/** Grappling Input Action */
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+    UInputAction* GrapplingAction;
+
 public:
 	ABeatEmUpCharacter();
 	
@@ -82,33 +87,59 @@ public:
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
+	// Development
+	UPROPERTY(EditAnywhere, Category="Development Settings")
+		bool bEnableDebug = true;
+
 	// Health
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="Character Settings")
 		float MaxHealth = 100;
 	UPROPERTY(EditAnywhere)
 		int CurrentHealth = MaxHealth;
 	
 	// Punch
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="Punch Settings")
 		float PunchDistance = 250;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="Punch Settings")
 		float PunchForce = 50000;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="Punch Settings")
 		float PunchDamage = 50;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="Punch Settings")
 		float PunchCooldown = 1;
-
-	// Use
-	UPROPERTY(EditAnywhere)
-		float UseDistance = 1000;
-
 	UFUNCTION()
 		void Punch();
 	UFUNCTION()
 		void ResetPunch();
+
+	// Use
+	UPROPERTY(EditAnywhere, Category="Character Settings")
+		float UseDistance = 1000;
 	UFUNCTION()
 		void Use();
+
+	// Grappling Hook
+	UPROPERTY(EditAnywhere, Category="Grappling Settings")
+		TSubclassOf<AGrapplingHook> GrapplingHookClass;
+	UPROPERTY(EditAnywhere, Category="Grappling Settings")
+		float VisionDistance = 3000;
+	UPROPERTY(EditAnywhere, Category="Grappling Settings")
+		float PullForceStrength = 250000.f;
+	UPROPERTY(EditAnywhere, Category="Grappling Settings")
+		float GrapplingHookAcceleration = 2000.0f;
+	UPROPERTY(EditAnywhere, Category="Grappling Settings")
+		float MaxGrapplingSpeed = 2000.0f;
+	
+	FVector GrapplingHookTarget;
+	FVector GrapplingForce;
+	bool bIsGrappling = false;
+	bool bIsGrapplingHookActive = false;
+	
+	UFUNCTION()
+		void LaunchGrapplingHook();
+	void StartGrapplingHook(const FVector& TargetLocation);
+	void StopGrapplingHook();
 	
 	void DealDamage(float Damage);
-};
 
+	virtual void Tick(float DeltaTime) override;
+};

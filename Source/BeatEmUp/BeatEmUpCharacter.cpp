@@ -11,9 +11,10 @@
 #include "GameFramework/Controller.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "GrapplingHook.h"
 #include "InputActionValue.h"
 #include "Interactable.h"
-// #include "Interactable.h"
+#include "DrawDebugHelpers.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -22,6 +23,8 @@ DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
 ABeatEmUpCharacter::ABeatEmUpCharacter()
 {
+	PrimaryActorTick.bCanEverTick = true;
+	
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 		
@@ -56,6 +59,21 @@ ABeatEmUpCharacter::ABeatEmUpCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+}
+
+void ABeatEmUpCharacter::Tick(float DeltaTime) {
+	Super::Tick(DeltaTime);
+
+	if(!bIsGrappling) return;
+
+	FVector Direction = (GrapplingHookTarget - GetActorLocation()).GetSafeNormal();
+	GrapplingForce += Direction * GrapplingHookAcceleration * DeltaTime;
+	GrapplingForce = GrapplingForce.GetClampedToMaxSize(MaxGrapplingSpeed);
+
+	GetCharacterMovement()->Velocity = GrapplingForce;
+
+	if(FVector::Dist(GetActorLocation(), GrapplingHookTarget) < 100.f)
+		StopGrapplingHook();
 }
 
 void ABeatEmUpCharacter::BeginPlay()
@@ -171,6 +189,9 @@ void ABeatEmUpCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 		// Using
 		EnhancedInputComponent->BindAction(UseAction, ETriggerEvent::Started, this, &ABeatEmUpCharacter::Use);
+
+		// Grappling
+		EnhancedInputComponent->BindAction(GrapplingAction, ETriggerEvent::Started, this, &ABeatEmUpCharacter::LaunchGrapplingHook);
 	}
 	else
 	{
@@ -212,4 +233,55 @@ void ABeatEmUpCharacter::Look(const FInputActionValue& Value)
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
+}
+
+void ABeatEmUpCharacter::LaunchGrapplingHook() {
+	if(bIsGrapplingHookActive) {
+		UE_LOG(LogTemp, Warning, TEXT("Already Activated!"));
+		return;
+	}
+	
+	FVector Start = GetActorLocation();
+	FVector End = Start + GetFollowCamera()->GetForwardVector() * VisionDistance;
+
+	FHitResult HitData;
+	FCollisionQueryParams TraceParams;
+	TraceParams.AddIgnoredActor(this);
+	bool bHit = GetWorld()->LineTraceSingleByChannel(HitData, Start, End, ECC_Visibility, TraceParams);
+	
+	if(bEnableDebug)
+		DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 5.0f, 0, 1.0f);
+
+	if(!bHit) return;
+	if(HitData.GetActor() == nullptr) return;
+
+	if(bEnableDebug)
+		DrawDebugSphere(GetWorld(), HitData.ImpactPoint, 10.0f, 12, FColor::Red, false, 5.0f, 0, 1.0f);
+
+	FVector Direction = (HitData.ImpactPoint - Start).GetSafeNormal();
+	FRotator LaunchRotation = Direction.Rotation() + FRotator(-90.f, 0.f, 0.f);
+
+	if (AGrapplingHook* GrapplingHook = GetWorld()->SpawnActor<AGrapplingHook>(GrapplingHookClass, Start, LaunchRotation)) {
+		GrapplingHook->Launch(HitData.ImpactPoint, this);
+		bIsGrapplingHookActive = true;
+	}
+}
+
+void ABeatEmUpCharacter::StartGrapplingHook(const FVector& TargetLocation) {
+	if(bIsGrappling) return;
+
+	GrapplingHookTarget = TargetLocation;
+	GrapplingForce = GetCharacterMovement()->Velocity;
+	bIsGrappling = true;
+
+	GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+}
+
+void ABeatEmUpCharacter::StopGrapplingHook() {
+	if(!bIsGrappling) return;
+
+	bIsGrappling = false;
+	bIsGrapplingHookActive = false;
+
+	GetCharacterMovement()->SetMovementMode(MOVE_Falling);
 }
