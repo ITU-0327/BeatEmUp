@@ -29,7 +29,7 @@ protected:
 
 private:
 	UPROPERTY(EditAnywhere, Category="Grappling Hook Setting")
-		float FlyingSpeed = 3000.0f;
+		float FlyingSpeed = 3500.0f;
 	UPROPERTY(EditAnywhere, Category="Grappling Hook Setting")
 		float AttachThreshold = 100.f;
 	

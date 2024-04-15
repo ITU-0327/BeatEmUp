@@ -23,6 +23,8 @@ DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
 ABeatEmUpCharacter::ABeatEmUpCharacter()
 {
+	PrimaryActorTick.bCanEverTick = true;
+	
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 		
@@ -57,6 +59,21 @@ ABeatEmUpCharacter::ABeatEmUpCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+}
+
+void ABeatEmUpCharacter::Tick(float DeltaTime) {
+	Super::Tick(DeltaTime);
+
+	if(!bIsGrappling) return;
+
+	FVector Direction = (GrapplingHookTarget - GetActorLocation()).GetSafeNormal();
+	GrapplingForce += Direction * GrapplingHookAcceleration * DeltaTime;
+	GrapplingForce = GrapplingForce.GetClampedToMaxSize(MaxGrapplingSpeed);
+
+	GetCharacterMovement()->Velocity = GrapplingForce;
+
+	if(FVector::Dist(GetActorLocation(), GrapplingHookTarget) < 100.f)
+		StopGrapplingHook();
 }
 
 void ABeatEmUpCharacter::BeginPlay()
@@ -219,8 +236,8 @@ void ABeatEmUpCharacter::Look(const FInputActionValue& Value)
 }
 
 void ABeatEmUpCharacter::LaunchGrapplingHook() {
-	if (bIsGrappling) {
-		UE_LOG(LogTemp, Warning, TEXT("Already grappling!"));
+	if(bIsGrapplingHookActive) {
+		UE_LOG(LogTemp, Warning, TEXT("Already Activated!"));
 		return;
 	}
 	
@@ -242,25 +259,27 @@ void ABeatEmUpCharacter::LaunchGrapplingHook() {
 	FVector Direction = (HitData.ImpactPoint - Start).GetSafeNormal();
 	FRotator LaunchRotation = Direction.Rotation() + FRotator(-90.f, 0.f, 0.f);
 
-	if (AGrapplingHook* GrapplingHook = GetWorld()->SpawnActor<AGrapplingHook>(GrapplingHookClass, Start, LaunchRotation))
+	if (AGrapplingHook* GrapplingHook = GetWorld()->SpawnActor<AGrapplingHook>(GrapplingHookClass, Start, LaunchRotation)) {
 		GrapplingHook->Launch(HitData.ImpactPoint, this);
+		bIsGrapplingHookActive = true;
+	}
 }
 
-void ABeatEmUpCharacter::FlyTowardPoint(const FVector& TargetPoint) {
-	GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+void ABeatEmUpCharacter::StartGrapplingHook(const FVector& TargetLocation) {
+	if(bIsGrappling) return;
+
+	GrapplingHookTarget = TargetLocation;
+	GrapplingForce = GetCharacterMovement()->Velocity;
 	bIsGrappling = true;
 
-	FVector Direction = (TargetPoint - GetActorLocation()).GetSafeNormal();
+	GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+}
 
-	float PseudoMass = 100.0f;
+void ABeatEmUpCharacter::StopGrapplingHook() {
+	if(!bIsGrappling) return;
 
-	float SimulatedForceStrength = 250000.0f;
+	bIsGrappling = false;
+	bIsGrapplingHookActive = false;
 
-	FVector Acceleration = (Direction * SimulatedForceStrength) / PseudoMass;
-
-	FVector NewVelocity = GetCharacterMovement()->Velocity + Acceleration;
-
-	GetCharacterMovement()->Velocity = NewVelocity;
-
-	UE_LOG(LogTemp, Warning, TEXT("Applying simulated force, new velocity: %s"), *GetCharacterMovement()->Velocity.ToString());
+	GetCharacterMovement()->SetMovementMode(MOVE_Falling);
 }

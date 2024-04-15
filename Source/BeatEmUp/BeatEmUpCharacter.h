@@ -120,11 +120,22 @@ public:
 		float VisionDistance = 3000;
 	UPROPERTY(EditAnywhere, Category="Grappling Settings")
 		float PullForceStrength = 250000.f;
+	UPROPERTY(EditAnywhere, Category="Grappling Settings")
+		float GrapplingHookAcceleration = 2000.0f;
+	UPROPERTY(EditAnywhere, Category="Grappling Settings")
+		float MaxGrapplingSpeed = 2000.0f;
+	
+	FVector GrapplingHookTarget;
+	FVector GrapplingForce;
 	bool bIsGrappling = false;
+	bool bIsGrapplingHookActive = false;
 	
 	UFUNCTION()
 		void LaunchGrapplingHook();
-	void FlyTowardPoint(const FVector& TargetPoint);
+	void StartGrapplingHook(const FVector& TargetLocation);
+	void StopGrapplingHook();
 	
 	void DealDamage(float Damage);
+
+	virtual void Tick(float DeltaTime) override;
 };

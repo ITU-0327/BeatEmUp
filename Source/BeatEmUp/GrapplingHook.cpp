@@ -4,7 +4,6 @@
 #include "GrapplingHook.h"
 
 #include "BeatEmUpCharacter.h"
-#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 AGrapplingHook::AGrapplingHook() {
@@ -19,7 +18,7 @@ AGrapplingHook::AGrapplingHook() {
 
 	CableComponent->CableLength = 1;
 	CableComponent->NumSegments = 1;
-	CableComponent->CableWidth = 10;
+	CableComponent->CableWidth = 0.1;
 }
 
 void AGrapplingHook::Launch(const FVector& NewTargetLocation, AActor* NewInitiator) {
@@ -52,7 +51,7 @@ void AGrapplingHook::Tick(float DeltaTime)
         if(Character == nullptr) return;
         
         if(!Character->bIsGrappling)
-        	Character->FlyTowardPoint(TargetLocation);
+        	Character->StartGrapplingHook(TargetLocation);
     
         bool bCutRope = false;
         
@@ -65,8 +64,7 @@ void AGrapplingHook::Tick(float DeltaTime)
         	bCutRope = true;
         
         if(bCutRope) {
-        	Character->bIsGrappling = false;
-            Character->GetCharacterMovement()->SetMovementMode(MOVE_Falling);
+        	Character->StopGrapplingHook();
             Destroy();
         }
 	}
