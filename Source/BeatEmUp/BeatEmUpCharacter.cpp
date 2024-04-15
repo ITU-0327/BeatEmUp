@@ -248,13 +248,15 @@ void ABeatEmUpCharacter::LaunchGrapplingHook() {
 	FCollisionQueryParams TraceParams;
 	TraceParams.AddIgnoredActor(this);
 	bool bHit = GetWorld()->LineTraceSingleByChannel(HitData, Start, End, ECC_Visibility, TraceParams);
-
-	DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 5.0f, 0, 1.0f);
+	
+	if(bEnableDebug)
+		DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 5.0f, 0, 1.0f);
 
 	if(!bHit) return;
 	if(HitData.GetActor() == nullptr) return;
 
-	DrawDebugSphere(GetWorld(), HitData.ImpactPoint, 10.0f, 12, FColor::Red, false, 5.0f, 0, 1.0f);
+	if(bEnableDebug)
+		DrawDebugSphere(GetWorld(), HitData.ImpactPoint, 10.0f, 12, FColor::Red, false, 5.0f, 0, 1.0f);
 
 	FVector Direction = (HitData.ImpactPoint - Start).GetSafeNormal();
 	FRotator LaunchRotation = Direction.Rotation() + FRotator(-90.f, 0.f, 0.f);

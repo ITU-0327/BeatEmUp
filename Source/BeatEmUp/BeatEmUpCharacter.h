@@ -87,6 +87,10 @@ public:
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
+	// Development
+	UPROPERTY(EditAnywhere, Category="Development Settings")
+		bool bEnableDebug = true;
+
 	// Health
 	UPROPERTY(EditAnywhere, Category="Character Settings")
 		float MaxHealth = 100;
