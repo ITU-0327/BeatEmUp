@@ -94,13 +94,13 @@ public:
 		int CurrentHealth = MaxHealth;
 	
 	// Punch
-	UPROPERTY(EditAnywhere, Category="Character Settings")
+	UPROPERTY(EditAnywhere, Category="Punch Settings")
 		float PunchDistance = 250;
-	UPROPERTY(EditAnywhere, Category="Character Settings")
+	UPROPERTY(EditAnywhere, Category="Punch Settings")
 		float PunchForce = 50000;
-	UPROPERTY(EditAnywhere, Category="Character Settings")
+	UPROPERTY(EditAnywhere, Category="Punch Settings")
 		float PunchDamage = 50;
-	UPROPERTY(EditAnywhere, Category="Character Settings")
+	UPROPERTY(EditAnywhere, Category="Punch Settings")
 		float PunchCooldown = 1;
 	UFUNCTION()
 		void Punch();
@@ -114,14 +114,17 @@ public:
 		void Use();
 
 	// Grappling Hook
-	UPROPERTY(EditAnywhere, Category="Character Settings")
+	UPROPERTY(EditAnywhere, Category="Grappling Settings")
 		TSubclassOf<AGrapplingHook> GrapplingHookClass;
-	UPROPERTY(EditAnywhere, Category="Character Settings")
+	UPROPERTY(EditAnywhere, Category="Grappling Settings")
 		float VisionDistance = 3000;
+	UPROPERTY(EditAnywhere, Category="Grappling Settings")
+		float PullForceStrength = 250000.f;
 	bool bIsGrappling = false;
 	
 	UFUNCTION()
 		void LaunchGrapplingHook();
+	void FlyTowardPoint(const FVector& TargetPoint);
 	
 	void DealDamage(float Damage);
 };

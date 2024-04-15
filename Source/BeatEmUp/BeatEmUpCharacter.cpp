@@ -242,8 +242,25 @@ void ABeatEmUpCharacter::LaunchGrapplingHook() {
 	FVector Direction = (HitData.ImpactPoint - Start).GetSafeNormal();
 	FRotator LaunchRotation = Direction.Rotation() + FRotator(-90.f, 0.f, 0.f);
 
-	if (AGrapplingHook* GrapplingHook = GetWorld()->SpawnActor<AGrapplingHook>(GrapplingHookClass, Start, LaunchRotation)) {
+	if (AGrapplingHook* GrapplingHook = GetWorld()->SpawnActor<AGrapplingHook>(GrapplingHookClass, Start, LaunchRotation))
 		GrapplingHook->Launch(HitData.ImpactPoint, this);
-		bIsGrappling = true;
-	}
+}
+
+void ABeatEmUpCharacter::FlyTowardPoint(const FVector& TargetPoint) {
+	GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+	bIsGrappling = true;
+
+	FVector Direction = (TargetPoint - GetActorLocation()).GetSafeNormal();
+
+	float PseudoMass = 100.0f;
+
+	float SimulatedForceStrength = 250000.0f;
+
+	FVector Acceleration = (Direction * SimulatedForceStrength) / PseudoMass;
+
+	FVector NewVelocity = GetCharacterMovement()->Velocity + Acceleration;
+
+	GetCharacterMovement()->Velocity = NewVelocity;
+
+	UE_LOG(LogTemp, Warning, TEXT("Applying simulated force, new velocity: %s"), *GetCharacterMovement()->Velocity.ToString());
 }

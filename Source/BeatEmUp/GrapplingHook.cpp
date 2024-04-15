@@ -4,6 +4,7 @@
 #include "GrapplingHook.h"
 
 #include "BeatEmUpCharacter.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 AGrapplingHook::AGrapplingHook() {
@@ -47,12 +48,26 @@ void AGrapplingHook::Tick(float DeltaTime)
 			bRetracting = true;
 	}
 	else {
-		FVector Direction = (Initiator->GetActorLocation() - GetActorLocation()).GetSafeNormal() * FlyingSpeed;
-		SetActorLocation(GetActorLocation() + Direction * DeltaTime);
-		if(FVector::Dist(GetActorLocation(), Initiator->GetActorLocation()) < AttachThreshold) {
-			if (ABeatEmUpCharacter* Character = Cast<ABeatEmUpCharacter>(Initiator))
-				Character->bIsGrappling = false;
-			Destroy();
-		}
+		ABeatEmUpCharacter* Character = Cast<ABeatEmUpCharacter>(Initiator);
+        if(Character == nullptr) return;
+        
+        if(!Character->bIsGrappling)
+        	Character->FlyTowardPoint(TargetLocation);
+    
+        bool bCutRope = false;
+        
+        if(FVector::Dist(GetActorLocation(), Initiator->GetActorLocation()) < AttachThreshold)
+        	bCutRope = true;
+
+		const FVector CableDirection = (GetActorLocation() - Character->GetActorLocation()).GetSafeNormal();
+		const FVector CharacterDirection = Character->GetActorRotation().Vector();
+        if(FVector::DotProduct(CharacterDirection, CableDirection) <= 0)
+        	bCutRope = true;
+        
+        if(bCutRope) {
+        	Character->bIsGrappling = false;
+            Character->GetCharacterMovement()->SetMovementMode(MOVE_Falling);
+            Destroy();
+        }
 	}
 }
