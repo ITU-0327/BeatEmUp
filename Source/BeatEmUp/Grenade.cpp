@@ -39,7 +39,7 @@ void AGrenade::Explode() {
 	UGameplayStatics::PlaySoundAtLocation(this, ExplosionSound, GetActorLocation());
 
 	TArray<AActor*> IgnoredActors;
-	// IgnoredActors.Add(this);
+	IgnoredActors.Add(this);
 	UGameplayStatics::ApplyRadialDamage(GetWorld(), 100.0f, GetActorLocation(), ExplosionRadius, nullptr, IgnoredActors, this, GetInstigatorController(), true);
 
 	TArray<FHitResult> HitResults;
@@ -64,8 +64,6 @@ void AGrenade::Explode() {
 		if(HitMesh == nullptr) continue;
 
 		HitMesh->AddRadialImpulse(GetActorLocation(), ExplosionRadius, ExplosionForce, RIF_Linear, true);
-		// const FVector ImpulseDirection = (Hit.ImpactPoint - GetActorLocation()).GetSafeNormal() * ExplosionForce;
-		// HitMesh->AddImpulse(ImpulseDirection, NAME_None, true);
 	}
 	
 	if(bEnableDebug)
