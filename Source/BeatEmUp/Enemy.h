@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "BeatEmUpCharacter.h"
+#include "DamageTextUI.h"
 #include "GameFramework/Character.h"
 #include "Enemy.generated.h"
 
@@ -23,15 +24,19 @@ protected:
 public:
 	UPROPERTY()
 		ABeatEmUpCharacter* Player;
-	UPROPERTY(EditAnywhere)
+	// Health
+	UPROPERTY(EditAnywhere, Category="Enemy Settings")
 		float MaxHealth = 100;
 	UPROPERTY(EditAnywhere)
 		float CurrentHealth = MaxHealth;
 
-	UPROPERTY(EditAnywhere)
+	// Damage
+	UPROPERTY(EditAnywhere, Category="Enemy Settings")
 		float DamageToPlayer = 10;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="Enemy Settings")
 		float RagdollTime = 5;
+	UPROPERTY(EditAnywhere, Category="Enemy Settings")
+		TSubclassOf<UDamageTextUI> DamageTextClass;
 	FTimerHandle RagdollTimerHandle;
 	
 	

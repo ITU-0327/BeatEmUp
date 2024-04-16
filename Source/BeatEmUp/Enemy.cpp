@@ -5,19 +5,19 @@
 
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
-AEnemy::AEnemy()
-{
+AEnemy::AEnemy() {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;	
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+	Player = nullptr;
 }
 
 // Called when the game starts or when spawned
-void AEnemy::BeginPlay()
-{
+void AEnemy::BeginPlay() {
 	Super::BeginPlay();
 
 	Player = Cast<ABeatEmUpCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
@@ -26,8 +26,7 @@ void AEnemy::BeginPlay()
 }
 
 // Called every frame
-void AEnemy::Tick(float DeltaTime)
-{
+void AEnemy::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 
 	if(Player == nullptr) return;
@@ -37,14 +36,18 @@ void AEnemy::Tick(float DeltaTime)
 }
 
 // Called to bind functionality to input
-void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
+void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
 }
 
 void AEnemy::DealDamage(float Damage) {
 	CurrentHealth = FMath::Clamp(CurrentHealth - Damage, 0.f, MaxHealth);
+
+	UDamageTextUI* SpawnedDamage = Cast<UDamageTextUI>(CreateWidget(GetGameInstance(), DamageTextClass));
+	UGameplayStatics::ProjectWorldToScreen(GetWorld()->GetFirstPlayerController(), GetMesh()->GetComponentLocation(), SpawnedDamage->CurrentLocation);
+	SpawnedDamage->DamageText->SetText(FText::FromString(FString::SanitizeFloat(Damage)));
+	SpawnedDamage->TargetLocation += SpawnedDamage->CurrentLocation;
+	SpawnedDamage->AddToViewport();
 }
 
 void AEnemy::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector Normal,
