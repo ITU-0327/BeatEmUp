@@ -4,6 +4,7 @@
 #include "Grenade.h"
 
 #include "BeatEmUpCharacter.h"
+#include "Enemy.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values
@@ -38,8 +39,35 @@ void AGrenade::Explode() {
 	UGameplayStatics::PlaySoundAtLocation(this, ExplosionSound, GetActorLocation());
 
 	TArray<AActor*> IgnoredActors;
+	// IgnoredActors.Add(this);
 	UGameplayStatics::ApplyRadialDamage(GetWorld(), 100.0f, GetActorLocation(), ExplosionRadius, nullptr, IgnoredActors, this, GetInstigatorController(), true);
 
+	TArray<FHitResult> HitResults;
+	FCollisionShape ExplosionSphere = FCollisionShape::MakeSphere(ExplosionRadius);
+	GetWorld()->SweepMultiByChannel(HitResults, GetActorLocation(), GetActorLocation(), FQuat::Identity, ECC_PhysicsBody, ExplosionSphere);
+
+	TArray<AActor*> HitActors;
+	for (FHitResult Hit : HitResults) {
+		if(HitActors.Contains(Hit.GetActor())) continue;
+
+		HitActors.Add(Hit.GetActor());
+		UMeshComponent* HitMesh;
+		if(AEnemy* HitEnemy = Cast<AEnemy>(Hit.GetActor())) {
+			HitMesh = Cast<UMeshComponent>(HitEnemy->GetMesh());
+			HitEnemy->Ragdoll();
+			HitEnemy->DealDamage(ExplosionDamage);
+		}
+		else {
+			HitMesh = Cast<UMeshComponent>(Hit.GetActor()->GetRootComponent());
+		}
+
+		if(HitMesh == nullptr) continue;
+
+		HitMesh->AddRadialImpulse(GetActorLocation(), ExplosionRadius, ExplosionForce, RIF_Linear, true);
+		// const FVector ImpulseDirection = (Hit.ImpactPoint - GetActorLocation()).GetSafeNormal() * ExplosionForce;
+		// HitMesh->AddImpulse(ImpulseDirection, NAME_None, true);
+	}
+	
 	if(bEnableDebug)
 		DrawDebugSphere(GetWorld(), GetActorLocation(), ExplosionRadius, 32, FColor::Red, false, 5.0f);
 

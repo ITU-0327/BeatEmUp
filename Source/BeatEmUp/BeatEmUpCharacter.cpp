@@ -240,6 +240,8 @@ void ABeatEmUpCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
+//////////////////////////////////////////////////////////////////////////
+// Grapple
 void ABeatEmUpCharacter::LaunchGrapplingHook() {
 	if(bIsGrapplingHookActive) {
 		UE_LOG(LogTemp, Warning, TEXT("Already Activated!"));
@@ -291,6 +293,8 @@ void ABeatEmUpCharacter::StopGrapplingHook() {
 	GetCharacterMovement()->SetMovementMode(MOVE_Falling);
 }
 
+//////////////////////////////////////////////////////////////////////////
+// Grenade
 void ABeatEmUpCharacter::PickUpGrenade() {
 	bHasGrenade = true;
 }
@@ -300,6 +304,8 @@ void ABeatEmUpCharacter::ThrowGrenade() {
 
 	bHasGrenade = false;
 	FVector ThrowDirection = GetFollowCamera()->GetForwardVector() + FVector::UpVector;
+	ThrowDirection.Normalize();
+	
 	ThrowDirection *= ThrowForce;
 	if(AGrenade* Grenade = GetWorld()->SpawnActor<AGrenade>(GrenadeClass, GetActorLocation() + FVector(0, 0, 50), FRotator::ZeroRotator))
 		Grenade->Initialize(ThrowDirection, bEnableDebug);

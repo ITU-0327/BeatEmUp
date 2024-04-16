@@ -25,16 +25,18 @@ public:
 
 	UPROPERTY(EditAnywhere, Category="Components")
 		UStaticMeshComponent* Mesh;
-	UPROPERTY(EditAnywhere, Category="Granade Effect")
+	UPROPERTY(EditAnywhere, Category="Grenade Effect")
 		UParticleSystem* ExplosionEffect;
-	UPROPERTY(EditAnywhere, Category="Granade Effect")
+	UPROPERTY(EditAnywhere, Category="Grenade Effect")
 		USoundBase* ExplosionSound;
 	
-	UPROPERTY(EditAnywhere, Category="Granade Settings")
-		float ExplosionRadius = 300.f;
-	UPROPERTY(EditAnywhere, Category="Granade Settings")
-		float ExplosionForce = 2000.f;
-	UPROPERTY(EditAnywhere, Category="Granade Settings")
+	UPROPERTY(EditAnywhere, Category="Grenade Settings")
+		float ExplosionRadius = 500.f;
+	UPROPERTY(EditAnywhere, Category="Grenade Settings")
+		float ExplosionForce = 2500.f;
+	UPROPERTY(EditAnywhere, Category="Grenade Settings")
+		float ExplosionDamage = 300;
+	UPROPERTY(EditAnywhere, Category="Grenade Settings")
 		float TimeToExplode = 3.0f;
 	
 	UFUNCTION()
