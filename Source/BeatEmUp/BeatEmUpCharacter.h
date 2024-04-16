@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GrapplingHook.h"
+#include "Grenade.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "Windows/AllowWindowsPlatformTypes.h"
@@ -58,6 +59,12 @@ class ABeatEmUpCharacter : public ACharacter
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
     UInputAction* GrapplingAction;
 
+	/** Grappling Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* PickUpAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* ThrowAction;
+	
 public:
 	ABeatEmUpCharacter();
 	
@@ -138,6 +145,15 @@ public:
 		void LaunchGrapplingHook();
 	void StartGrapplingHook(const FVector& TargetLocation);
 	void StopGrapplingHook();
+
+	// Grenade
+	UPROPERTY(EditAnywhere, Category="Grappling Settings")
+		TSubclassOf<AGrenade> GrenadeClass;
+	UPROPERTY(EditAnywhere, Category="Grenade Settings")
+		float ThrowForce = 200.f;
+	bool bHasGrenade = false;
+	void PickUpGrenade();
+	void ThrowGrenade();
 	
 	void DealDamage(float Damage);
 
