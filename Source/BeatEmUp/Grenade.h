@@ -37,7 +37,7 @@ public:
 	UPROPERTY(EditAnywhere, Category="Grenade Settings")
 		float ExplosionDamage = 300;
 	UPROPERTY(EditAnywhere, Category="Grenade Settings")
-		float TimeToExplode = 3.0f;
+		float TimeToExplode = 3.5f;
 	
 	UFUNCTION()
 		void Initialize(const FVector& ThrowDirection, bool bDebug);

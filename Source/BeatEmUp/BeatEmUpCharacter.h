@@ -150,7 +150,7 @@ public:
 	UPROPERTY(EditAnywhere, Category="Grappling Settings")
 		TSubclassOf<AGrenade> GrenadeClass;
 	UPROPERTY(EditAnywhere, Category="Grenade Settings")
-		float ThrowForce = 200.f;
+		float ThrowForce = 1000.f;
 	bool bHasGrenade = false;
 	void PickUpGrenade();
 	void ThrowGrenade();
