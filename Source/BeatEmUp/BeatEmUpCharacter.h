@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GrapplingHook.h"
 #include "Grenade.h"
+#include "InGameUI.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "Windows/AllowWindowsPlatformTypes.h"
@@ -77,11 +78,6 @@ protected:
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
 
-	bool bPunchReady = true;
-	FTimerHandle PunchTimerHandle;
-			
-
-protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
@@ -101,7 +97,7 @@ public:
 	// Health
 	UPROPERTY(EditAnywhere, Category="Character Settings")
 		float MaxHealth = 100;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY()
 		int CurrentHealth = MaxHealth;
 	
 	// Punch
@@ -113,6 +109,10 @@ public:
 		float PunchDamage = 50;
 	UPROPERTY(EditAnywhere, Category="Punch Settings")
 		float PunchCooldown = 1;
+
+	bool bPunchReady = true;
+	FTimerHandle PunchTimerHandle;
+	
 	UFUNCTION()
 		void Punch();
 	UFUNCTION()
@@ -128,7 +128,7 @@ public:
 	UPROPERTY(EditAnywhere, Category="Grappling Settings")
 		TSubclassOf<AGrapplingHook> GrapplingHookClass;
 	UPROPERTY(EditAnywhere, Category="Grappling Settings")
-		float VisionDistance = 3000;
+		float GrapplingDistance = 3000;
 	UPROPERTY(EditAnywhere, Category="Grappling Settings")
 		float PullForceStrength = 250000.f;
 	UPROPERTY(EditAnywhere, Category="Grappling Settings")
@@ -147,14 +147,21 @@ public:
 	void StopGrapplingHook();
 
 	// Grenade
-	UPROPERTY(EditAnywhere, Category="Grappling Settings")
+	UPROPERTY(EditAnywhere, Category="Grenade Settings")
 		TSubclassOf<AGrenade> GrenadeClass;
 	UPROPERTY(EditAnywhere, Category="Grenade Settings")
 		float ThrowForce = 1000.f;
 	bool bHasGrenade = false;
 	void PickUpGrenade();
 	void ThrowGrenade();
-	
+
+	// In-Game UI
+	UPROPERTY(EditAnywhere, Category="In-Game UI")
+		TSubclassOf<UInGameUI> InGameUIClass;
+	UPROPERTY()
+		UInGameUI* InGameUI;
+		
+	// Helper Functions
 	void DealDamage(float Damage);
 
 	virtual void Tick(float DeltaTime) override;

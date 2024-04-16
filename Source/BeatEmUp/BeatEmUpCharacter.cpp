@@ -64,6 +64,9 @@ ABeatEmUpCharacter::ABeatEmUpCharacter()
 
 void ABeatEmUpCharacter::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
+	
+	if(GetWorld()->GetTimerManager().TimerExists(PunchTimerHandle))
+		InGameUI->UpdateValues();
 
 	if(!bIsGrappling) return;
 
@@ -83,15 +86,20 @@ void ABeatEmUpCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	//Add Input Mapping Context
-	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
-	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
-		{
+	if (APlayerController* PlayerController = Cast<APlayerController>(Controller)) {
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer())) {
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
+
+	InGameUI = Cast<UInGameUI>(CreateWidget(GetGameInstance(), InGameUIClass));
+	InGameUI->Player = this;
+	InGameUI->UpdateValues();
+	InGameUI->AddToViewport();
 }
 
+//////////////////////////////////////////////////////////////////////////
+// Punch
 void ABeatEmUpCharacter::Punch() {
 	if(!bPunchReady) return;
 
@@ -126,6 +134,7 @@ void ABeatEmUpCharacter::Punch() {
 
 void ABeatEmUpCharacter::ResetPunch() {
 	bPunchReady = true;
+	InGameUI->UpdateValues();
 }
 
 void ABeatEmUpCharacter::Use() {
@@ -165,79 +174,10 @@ void ABeatEmUpCharacter::Use() {
 
 void ABeatEmUpCharacter::DealDamage(float Damage) {
 	CurrentHealth = FMath::Clamp(CurrentHealth - Damage, 0.f, MaxHealth);
-}
 
-//////////////////////////////////////////////////////////////////////////
-// Input
-
-void ABeatEmUpCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	// Set up action bindings
-	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
-		
-		// Jumping
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
-
-		// Moving
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ABeatEmUpCharacter::Move);
-
-		// Looking
-		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ABeatEmUpCharacter::Look);
-
-		// Punching
-		EnhancedInputComponent->BindAction(PunchAction, ETriggerEvent::Started, this, &ABeatEmUpCharacter::Punch);
-
-		// Using
-		EnhancedInputComponent->BindAction(UseAction, ETriggerEvent::Started, this, &ABeatEmUpCharacter::Use);
-
-		// Grappling
-		EnhancedInputComponent->BindAction(GrapplingAction, ETriggerEvent::Started, this, &ABeatEmUpCharacter::LaunchGrapplingHook);
-
-		// Throwing Grenade
-		EnhancedInputComponent->BindAction(PickUpAction, ETriggerEvent::Started, this, &ABeatEmUpCharacter::PickUpGrenade);
-		EnhancedInputComponent->BindAction(ThrowAction, ETriggerEvent::Started, this, &ABeatEmUpCharacter::ThrowGrenade);
-	}
-	else
-	{
-		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
-	}
-}
-
-void ABeatEmUpCharacter::Move(const FInputActionValue& Value)
-{
-	// input is a Vector2D
-	FVector2D MovementVector = Value.Get<FVector2D>();
-
-	if (Controller != nullptr)
-	{
-		// find out which way is forward
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
-
-		// get forward vector
-		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-	
-		// get right vector 
-		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-
-		// add movement 
-		AddMovementInput(ForwardDirection, MovementVector.Y);
-		AddMovementInput(RightDirection, MovementVector.X);
-	}
-}
-
-void ABeatEmUpCharacter::Look(const FInputActionValue& Value)
-{
-	// input is a Vector2D
-	FVector2D LookAxisVector = Value.Get<FVector2D>();
-
-	if (Controller != nullptr)
-	{
-		// add yaw and pitch input to controller
-		AddControllerYawInput(LookAxisVector.X);
-		AddControllerPitchInput(LookAxisVector.Y);
-	}
+	InGameUI->UpdateValues();
+	if(CurrentHealth == 0)
+		Cast<APlayerController>(GetController())->RestartLevel();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -249,7 +189,7 @@ void ABeatEmUpCharacter::LaunchGrapplingHook() {
 	}
 	
 	FVector Start = GetActorLocation();
-	FVector End = Start + GetFollowCamera()->GetForwardVector() * VisionDistance;
+	FVector End = Start + GetFollowCamera()->GetForwardVector() * GrapplingDistance;
 
 	FHitResult HitData;
 	FCollisionQueryParams TraceParams;
@@ -309,4 +249,77 @@ void ABeatEmUpCharacter::ThrowGrenade() {
 	ThrowDirection *= ThrowForce;
 	if(AGrenade* Grenade = GetWorld()->SpawnActor<AGrenade>(GrenadeClass, GetActorLocation() + FVector(0, 0, 50), FRotator::ZeroRotator))
 		Grenade->Initialize(ThrowDirection, bEnableDebug);
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+// Input
+
+void ABeatEmUpCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	// Set up action bindings
+	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
+		
+		// Jumping
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
+
+		// Moving
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ABeatEmUpCharacter::Move);
+
+		// Looking
+		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ABeatEmUpCharacter::Look);
+
+		// Punching
+		EnhancedInputComponent->BindAction(PunchAction, ETriggerEvent::Started, this, &ABeatEmUpCharacter::Punch);
+
+		// Using
+		EnhancedInputComponent->BindAction(UseAction, ETriggerEvent::Started, this, &ABeatEmUpCharacter::Use);
+
+		// Grappling
+		EnhancedInputComponent->BindAction(GrapplingAction, ETriggerEvent::Started, this, &ABeatEmUpCharacter::LaunchGrapplingHook);
+
+		// Throwing Grenade
+		EnhancedInputComponent->BindAction(PickUpAction, ETriggerEvent::Started, this, &ABeatEmUpCharacter::PickUpGrenade);
+		EnhancedInputComponent->BindAction(ThrowAction, ETriggerEvent::Started, this, &ABeatEmUpCharacter::ThrowGrenade);
+	}
+	else {
+		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
+	}
+}
+
+void ABeatEmUpCharacter::Move(const FInputActionValue& Value)
+{
+	// input is a Vector2D
+	FVector2D MovementVector = Value.Get<FVector2D>();
+
+	if (Controller != nullptr)
+	{
+		// find out which way is forward
+		const FRotator Rotation = Controller->GetControlRotation();
+		const FRotator YawRotation(0, Rotation.Yaw, 0);
+
+		// get forward vector
+		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+	
+		// get right vector 
+		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+		// add movement 
+		AddMovementInput(ForwardDirection, MovementVector.Y);
+		AddMovementInput(RightDirection, MovementVector.X);
+	}
+}
+
+void ABeatEmUpCharacter::Look(const FInputActionValue& Value)
+{
+	// input is a Vector2D
+	FVector2D LookAxisVector = Value.Get<FVector2D>();
+
+	if (Controller != nullptr)
+	{
+		// add yaw and pitch input to controller
+		AddControllerYawInput(LookAxisVector.X);
+		AddControllerPitchInput(LookAxisVector.Y);
+	}
 }
