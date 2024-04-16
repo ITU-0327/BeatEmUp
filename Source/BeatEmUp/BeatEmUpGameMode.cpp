@@ -13,3 +13,10 @@ ABeatEmUpGameMode::ABeatEmUpGameMode()
 		DefaultPawnClass = PlayerPawnBPClass.Class;
 	}
 }
+
+void ABeatEmUpGameMode::BeginPlay() {
+	Super::BeginPlay();
+
+	GetWorld()->GetFirstPlayerController()->SetInputMode(FInputModeGameOnly());
+	GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(false);
+}

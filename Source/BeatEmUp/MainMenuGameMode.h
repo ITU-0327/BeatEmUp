@@ -13,5 +13,10 @@ UCLASS()
 class BEATEMUP_API AMainMenuGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
-	
+
+public:
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<UUserWidget> MainMenuClass;
+
+	virtual void BeginPlay() override;
 };

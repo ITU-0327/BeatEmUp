@@ -13,6 +13,8 @@ class ABeatEmUpGameMode : public AGameModeBase
 
 public:
 	ABeatEmUpGameMode();
+
+	virtual void BeginPlay() override;
 };
 
 
