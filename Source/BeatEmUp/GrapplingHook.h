@@ -41,8 +41,6 @@ private:
 		float MaxFlyingSpeed = 3500.0f;
 	UPROPERTY(EditAnywhere, Category="Grappling Hook Setting")
 		float AttachThreshold = 100.f;
-	UPROPERTY(EditAnywhere, Category="Grappling Hook Setting")
-		float PullForce = 1000.f;
 	
 	UPROPERTY()
 		AActor* Initiator;
