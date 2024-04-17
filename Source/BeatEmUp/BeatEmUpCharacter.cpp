@@ -206,7 +206,7 @@ void ABeatEmUpCharacter::LaunchGrapplingHook() {
 		DrawDebugSphere(GetWorld(), HitData.ImpactPoint, 10.0f, 12, FColor::Red, false, 5.0f, 0, 1.0f);
 
 	FVector Direction = (HitData.ImpactPoint - Start).GetSafeNormal();
-	FRotator LaunchRotation = Direction.Rotation() + FRotator(-90.f, 0.f, 0.f);
+	FRotator LaunchRotation = Direction.Rotation();
 
 	if (AGrapplingHook* GrapplingHook = GetWorld()->SpawnActor<AGrapplingHook>(GrapplingHookClass, Start, LaunchRotation)) {
 		GrapplingHook->Launch(HitData.ImpactPoint, this);
