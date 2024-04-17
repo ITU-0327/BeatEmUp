@@ -130,8 +130,6 @@ public:
 	UPROPERTY(EditAnywhere, Category="Grappling Settings")
 		float GrapplingDistance = 3000;
 	UPROPERTY(EditAnywhere, Category="Grappling Settings")
-		float PullForceStrength = 250000.f;
-	UPROPERTY(EditAnywhere, Category="Grappling Settings")
 		float GrapplingHookAcceleration = 2000.0f;
 	UPROPERTY(EditAnywhere, Category="Grappling Settings")
 		float MaxGrapplingSpeed = 2000.0f;

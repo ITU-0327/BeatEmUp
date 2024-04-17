@@ -36,16 +36,23 @@ protected:
 
 private:
 	UPROPERTY(EditAnywhere, Category="Grappling Hook Setting")
-		float InitFlingSpeed = 2000.f;
+		float InitFlingSpeed = 2500.f;
 	UPROPERTY(EditAnywhere, Category="Grappling Hook Setting")
 		float MaxFlyingSpeed = 3500.0f;
 	UPROPERTY(EditAnywhere, Category="Grappling Hook Setting")
 		float AttachThreshold = 100.f;
+	UPROPERTY(EditAnywhere, Category="Grappling Hook Setting")
+		float PullForce = 1000.f;
 	
 	UPROPERTY()
 		AActor* Initiator;
 	FVector TargetLocation;
-	
+	UPROPERTY()
+		AActor* TargetActor;
+	UPROPERTY()
+		UPrimitiveComponent* TargetComponent;
+
+	bool bIsPulling = false;
 	bool bRetracting = false;
 
 public:	

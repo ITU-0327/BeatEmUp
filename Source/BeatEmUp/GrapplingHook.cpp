@@ -45,9 +45,12 @@ void AGrapplingHook::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	const FVector HookLocation = GetActorLocation();
+	const FVector PlayerLocation = Initiator->GetActorLocation();
+	const float Distance = FVector::Dist(HookLocation, PlayerLocation);
+
 	if(!bRetracting) {
-		// SetActorLocation(FMath::VInterpConstantTo(GetActorLocation(), TargetLocation, DeltaTime, MaxFlyingSpeed));
-		if(FVector::Dist(GetActorLocation(), TargetLocation) < AttachThreshold)
+		if(FVector::Dist(HookLocation, TargetLocation) < AttachThreshold)
 			bRetracting = true;
 	}
 	else {
@@ -59,7 +62,7 @@ void AGrapplingHook::Tick(float DeltaTime)
     
         bool bCutRope = false;
         
-        if(FVector::Dist(GetActorLocation(), Initiator->GetActorLocation()) < AttachThreshold)
+        if(Distance < AttachThreshold)
         	bCutRope = true;
 
 		const FVector CableDirection = (GetActorLocation() - Character->GetActorLocation()).GetSafeNormal();
@@ -71,6 +74,23 @@ void AGrapplingHook::Tick(float DeltaTime)
         	Character->StopGrapplingHook();
             Destroy();
         }
+	}
+
+	if (bIsPulling && TargetActor) {
+		if (Distance < AttachThreshold) {
+			bIsPulling = false;
+			return;
+		}
+
+		const FVector PullDirection = (PlayerLocation - HookLocation).GetSafeNormal();
+		if(TargetComponent->IsSimulatingPhysics())
+			PullForce = 60000.f / TargetComponent->GetMass();
+		else if(AEnemy* HitEnemy = Cast<AEnemy>(TargetActor))
+			PullForce = 1000.f;
+		else return;
+
+		const FVector TargetPull = PullDirection * PullForce * DeltaTime;
+		TargetActor->SetActorLocation(TargetActor->GetActorLocation() + TargetPull);
 	}
 }
 
@@ -90,13 +110,20 @@ void AGrapplingHook::Launch(const FVector& NewTargetLocation, AActor* NewInitiat
 void AGrapplingHook::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 	FVector NormalImpulse, const FHitResult& Hit) {
 	if(OtherActor == Initiator) return;
+
+	TargetLocation = Hit.ImpactPoint;
 	
 	if (AEnemy* HitEnemy = Cast<AEnemy>(OtherActor)) {
-		UE_LOG(LogTemp, Warning, TEXT("OnHit() Called by %s"), *OtherActor->GetName());
+		UE_LOG(LogTemp, Warning, TEXT("Grappling hook hit enemy: %s"), *OtherActor->GetName());
 		AttachToComponent(OtherComp, FAttachmentTransformRules::KeepWorldTransform);
 	}
-	else if (OtherComp && OtherComp->IsSimulatingPhysics()) {
+	else if(OtherComp && OtherComp->IsSimulatingPhysics()) {
+		UE_LOG(LogTemp, Warning, TEXT("Grappling hook hit physics component, Actor is %s"), *OtherActor->GetName());
 		AttachToComponent(OtherComp, FAttachmentTransformRules::KeepWorldTransform);
 	}
 	
+	ProjectileMovement->StopMovementImmediately();
+	TargetActor = OtherActor;
+	TargetComponent = OtherComp;
+	bIsPulling = true;
 }
