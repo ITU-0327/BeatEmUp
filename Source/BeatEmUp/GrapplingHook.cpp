@@ -5,7 +5,6 @@
 
 #include "BeatEmUpCharacter.h"
 #include "Enemy.h"
-#include "Components/SphereComponent.h"
 
 // Sets default values
 AGrapplingHook::AGrapplingHook() {
@@ -52,46 +51,39 @@ void AGrapplingHook::Tick(float DeltaTime)
 	if(!bRetracting) {
 		if(FVector::Dist(HookLocation, TargetLocation) < AttachThreshold)
 			bRetracting = true;
+		return;
 	}
-	else {
-		ABeatEmUpCharacter* Character = Cast<ABeatEmUpCharacter>(Initiator);
-        if(Character == nullptr) return;
-        
-        if(!Character->bIsGrappling)
-        	Character->StartGrapplingHook(TargetLocation);
+	
+	ABeatEmUpCharacter* Character = Cast<ABeatEmUpCharacter>(Initiator);
+    if(Character == nullptr) return;
     
-        bool bCutRope = false;
-        
-        if(Distance < AttachThreshold)
-        	bCutRope = true;
+    if(!Character->bIsGrappling)
+        Character->StartGrapplingHook(TargetLocation);
 
-		const FVector CableDirection = (GetActorLocation() - Character->GetActorLocation()).GetSafeNormal();
-		const FVector CharacterDirection = Character->GetActorRotation().Vector();
-        if(FVector::DotProduct(CharacterDirection, CableDirection) <= 0)
-        	bCutRope = true;
-        
-        if(bCutRope) {
-        	Character->StopGrapplingHook();
-            Destroy();
-        }
-	}
+    bool bCutRope = false;
+    
+    if(Distance < AttachThreshold)
+        bCutRope = true;
 
-	if (bIsPulling && TargetActor) {
-		if (Distance < AttachThreshold) {
-			bIsPulling = false;
-			return;
-		}
+	const FVector CableDirection = (GetActorLocation() - Character->GetActorLocation()).GetSafeNormal();
+	const FVector CharacterDirection = Character->GetActorRotation().Vector();
+    if(FVector::DotProduct(CharacterDirection, CableDirection) <= 0)
+        bCutRope = true;
+    
+    if(bCutRope) {
+        Character->StopGrapplingHook();
+        Destroy();
+    }
 
-		const FVector PullDirection = (PlayerLocation - HookLocation).GetSafeNormal();
-		if(TargetComponent->IsSimulatingPhysics())
-			PullForce = 60000.f / TargetComponent->GetMass();
-		else if(AEnemy* HitEnemy = Cast<AEnemy>(TargetActor))
-			PullForce = 1000.f;
-		else return;
+	const FVector PullDirection = (PlayerLocation - HookLocation).GetSafeNormal();
+	if(TargetComponent && TargetComponent->IsSimulatingPhysics())
+		PullForce = 70000.f / TargetComponent->GetMass();
+	else if(Cast<AEnemy>(TargetActor))
+		PullForce = 1000.f;
+	else return;
 
-		const FVector TargetPull = PullDirection * PullForce * DeltaTime;
-		TargetActor->SetActorLocation(TargetActor->GetActorLocation() + TargetPull);
-	}
+	const FVector TargetPull = PullDirection * PullForce * DeltaTime;
+	TargetActor->SetActorLocation(TargetActor->GetActorLocation() + TargetPull);
 }
 
 void AGrapplingHook::Launch(const FVector& NewTargetLocation, AActor* NewInitiator) {
@@ -113,17 +105,9 @@ void AGrapplingHook::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPr
 
 	TargetLocation = Hit.ImpactPoint;
 	
-	if (AEnemy* HitEnemy = Cast<AEnemy>(OtherActor)) {
-		UE_LOG(LogTemp, Warning, TEXT("Grappling hook hit enemy: %s"), *OtherActor->GetName());
+	if (Cast<AEnemy>(OtherActor) || (OtherComp && OtherComp->IsSimulatingPhysics()))
 		AttachToComponent(OtherComp, FAttachmentTransformRules::KeepWorldTransform);
-	}
-	else if(OtherComp && OtherComp->IsSimulatingPhysics()) {
-		UE_LOG(LogTemp, Warning, TEXT("Grappling hook hit physics component, Actor is %s"), *OtherActor->GetName());
-		AttachToComponent(OtherComp, FAttachmentTransformRules::KeepWorldTransform);
-	}
 	
-	ProjectileMovement->StopMovementImmediately();
 	TargetActor = OtherActor;
 	TargetComponent = OtherComp;
-	bIsPulling = true;
 }
