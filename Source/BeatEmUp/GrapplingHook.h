@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "CableComponent.h"
+#include "Components/SphereComponent.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 #include "GrapplingHook.generated.h"
 
 UCLASS()
@@ -17,26 +19,38 @@ public:
 	AGrapplingHook();
 
 	void Launch(const FVector& NewTargetLocation, AActor* NewInitiator);
+	UFUNCTION()
+		void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "Components")
+	UPROPERTY(EditAnywhere, Category= "Components")
 		UStaticMeshComponent* HookMesh;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "Components")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Components")
+		UProjectileMovementComponent* ProjectileMovement;
+	UPROPERTY(EditAnywhere, Category= "Components")
 		UCableComponent* CableComponent;
 
 private:
 	UPROPERTY(EditAnywhere, Category="Grappling Hook Setting")
-		float FlyingSpeed = 3500.0f;
+		float InitFlingSpeed = 2500.f;
+	UPROPERTY(EditAnywhere, Category="Grappling Hook Setting")
+		float MaxFlyingSpeed = 3500.0f;
 	UPROPERTY(EditAnywhere, Category="Grappling Hook Setting")
 		float AttachThreshold = 100.f;
 	
 	UPROPERTY()
 		AActor* Initiator;
 	FVector TargetLocation;
-	
+	UPROPERTY()
+		AActor* TargetActor;
+	UPROPERTY()
+		UPrimitiveComponent* TargetComponent;
+
+	bool bIsPulling = false;
 	bool bRetracting = false;
 
 public:	
