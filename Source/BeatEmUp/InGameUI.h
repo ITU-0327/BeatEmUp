@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/Image.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "InGameUI.generated.h"
@@ -24,9 +25,12 @@ public:
 		UTextBlock* MaxHealthText;
 	UPROPERTY(meta=(BindWidget))
 		UProgressBar* PunchCooldown;
+	UPROPERTY(meta=(BindWidget))
+		UImage* PlayerIndicator;
 
 	UPROPERTY()
 		ABeatEmUpCharacter* Player;
 
 	void UpdateValues() const;
+	void UpdatePlayerIndicator(float Rotation) const;
 };

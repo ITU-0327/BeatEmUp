@@ -35,6 +35,11 @@ void AMiniMap::Tick(float DeltaTime)
 	if(ABeatEmUpCharacter* Character = Cast<ABeatEmUpCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0))) {
 		const FVector NewLocation = Character->GetActorLocation() + FVector(0, 0, HeightAbovePlayer);
 		SetActorLocation(NewLocation);
+
+		UserWidget = Character->InGameUI;
+		if(UserWidget) {
+			float Rotation = Character->GetActorRotation().Yaw;
+			UserWidget->UpdatePlayerIndicator(Rotation);
+		}
 	}
 }
-

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InGameUI.h"
 #include "GameFramework/Actor.h"
 #include "MiniMap.generated.h"
 
@@ -23,9 +24,12 @@ protected:
 		USceneCaptureComponent2D* SceneCaptureComponent;
 
 	UPROPERTY(EditAnywhere, Category="Settings")
-		float HeightAbovePlayer = 1000.0f;
+		float HeightAbovePlayer = 2500.0f;
 
-public:	
+	UPROPERTY()
+		UInGameUI* UserWidget;
+
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 };

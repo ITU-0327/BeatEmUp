@@ -13,3 +13,9 @@ void UInGameUI::UpdateValues() const {
 		PunchTimePercentage = GetWorld()->GetTimerManager().GetTimerRemaining(Player->PunchTimerHandle) / Player->PunchCooldown;
 	PunchCooldown->SetPercent(1 - PunchTimePercentage);
 }
+
+void UInGameUI::UpdatePlayerIndicator(float Rotation) const{
+	if (PlayerIndicator)
+		PlayerIndicator->SetRenderTransformAngle(Rotation);
+}
+
