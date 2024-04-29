@@ -28,11 +28,6 @@ void AEnemy::BeginPlay() {
 // Called every frame
 void AEnemy::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
-
-	if(Player == nullptr) return;
-
-	const FVector TowardsPlayer = Player->GetActorLocation() - GetActorLocation();
-	AddMovementInput(TowardsPlayer);
 }
 
 // Called to bind functionality to input
