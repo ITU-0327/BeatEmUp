@@ -36,7 +36,7 @@ protected:
 
 private:
 	UPROPERTY(EditAnywhere, Category="Grappling Hook Setting")
-		float InitFlingSpeed = 2500.f;
+		float InitFlingSpeed = 2000.f;
 	UPROPERTY(EditAnywhere, Category="Grappling Hook Setting")
 		float MaxFlyingSpeed = 3500.0f;
 	UPROPERTY(EditAnywhere, Category="Grappling Hook Setting")

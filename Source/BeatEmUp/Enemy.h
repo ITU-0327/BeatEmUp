@@ -52,5 +52,5 @@ public:
 
 	void Ragdoll();
 	UFUNCTION()
-	void StopRagdoll();
+		void StopRagdoll();
 };
