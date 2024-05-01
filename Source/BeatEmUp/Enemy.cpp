@@ -27,6 +27,14 @@ void AEnemy::BeginPlay() {
 	GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &AEnemy::OnHit);
 }
 
+void AEnemy::Shoot(FVector Direction) {
+	const FVector SpawnLocation = GetActorLocation() + GetActorForwardVector() * 100;
+	const FRotator SpawnRotation = Direction.Rotation();
+	const ABullet* SpawnedBullet = Cast<ABullet>(GetWorld()->SpawnActor(BulletClass, &SpawnLocation, &SpawnRotation));
+	Direction.Normalize();
+	SpawnedBullet->MovementComponent->Velocity = Direction * SpawnedBullet->MovementSpeed;
+}
+
 // Called every frame
 void AEnemy::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);

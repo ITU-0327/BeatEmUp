@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "BeatEmUpCharacter.h"
+#include "Bullet.h"
 #include "DamageTextUI.h"
 #include "GameFramework/Character.h"
 #include "Enemy.generated.h"
@@ -38,6 +39,11 @@ public:
 	UPROPERTY(EditAnywhere, Category="Enemy Settings")
 		TSubclassOf<UDamageTextUI> DamageTextClass;
 	FTimerHandle RagdollTimerHandle;
+
+	// Range Attack
+	UPROPERTY(EditAnywhere, Category="Enemy Settings")
+		TSubclassOf<ABullet> BulletClass;
+	void Shoot(FVector Direction);
 	
 	
 	// Called every frame

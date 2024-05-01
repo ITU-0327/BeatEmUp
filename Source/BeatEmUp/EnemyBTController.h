@@ -31,15 +31,15 @@ public:
 	UFUNCTION()
 		void OnSensesUpdated(AActor* UpdatedActor, FAIStimulus Stimulus);
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="Enemy Settings")
 		float SightRadius = 500;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="Enemy Settings")
 		float SightAge = 3.5;
 	UPROPERTY(EditAnywhere)
 		float LoseSightRadius = SightRadius + 50;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="Enemy Settings")
 		float FieldOfView = 45;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="Enemy Settings")
 		float PatrolDistance = 2000;
 	UPROPERTY(EditAnywhere)
 		UAISenseConfig_Sight* SightConfig;
@@ -53,4 +53,8 @@ public:
 		UNavigationSystemV1* NavSystem;
 	UPROPERTY()
 		APawn* TargetPlayer;
+
+	UPROPERTY(EditAnywhere, Category="Enemy Settings")
+		float Ammo = 5;
+	void Shoot();
 };
