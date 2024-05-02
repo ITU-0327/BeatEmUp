@@ -2,7 +2,7 @@
 
 
 #include "EnemyBTController.h"
-
+#include "DrawDebugHelpers.h"
 #include "Enemy.h"
 
 AEnemyBTController::AEnemyBTController() {
@@ -37,6 +37,7 @@ void AEnemyBTController::BeginPlay() {
 
 void AEnemyBTController::Tick(float DeltaSeconds) {
 	Super::Tick(DeltaSeconds);
+	DrawDebugVision();
 
 	if(!TargetPlayer) return;
 
@@ -67,6 +68,8 @@ void AEnemyBTController::OnSensesUpdated(AActor* UpdatedActor, FAIStimulus Stimu
 		TargetPlayer = SensedPawn;
 		BlackboardComponent->SetValueAsBool("ChasePlayer", true);
 		BlackboardComponent->SetValueAsVector("PlayerLocation", TargetPlayer->GetActorLocation());
+
+		AlertNearbyEnemies();
 	}
 	else {
 		TargetPlayer = nullptr;
@@ -79,4 +82,59 @@ void AEnemyBTController::Shoot() {
 	Cast<AEnemy>(GetPawn())->Shoot(ShootDirection);
 	Ammo--;
 	BlackboardComponent->SetValueAsBool("HasAmmo", Ammo > 0);
+}
+
+void AEnemyBTController::AlertNearbyEnemies() {
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(GetPawn());
+
+	TArray<FOverlapResult> OverlapResults;
+	GetWorld()->OverlapMultiByObjectType(
+		OverlapResults,
+		GetPawn()->GetActorLocation(),
+		FQuat::Identity,
+		FCollisionObjectQueryParams(ECC_Pawn),
+		FCollisionShape::MakeSphere(AlertRadius),
+		QueryParams
+	);
+
+	for (FOverlapResult Result : OverlapResults) {
+		APawn* EnemyPawn = Cast<APawn>(Result.GetActor());
+		if(!EnemyPawn) continue;
+		if(EnemyPawn == GetPawn()) continue;
+		
+		if (AEnemyBTController* EnemyController = Cast<AEnemyBTController>(EnemyPawn->GetController()))
+			EnemyController->OnAlerted(TargetPlayer);
+	}
+}
+
+void AEnemyBTController::OnAlerted(APawn* AlertedPlayer) {
+	TargetPlayer = AlertedPlayer;
+	BlackboardComponent->SetValueAsBool("ChasePlayer", true);
+	BlackboardComponent->SetValueAsVector("PlayerLocation", TargetPlayer->GetActorLocation());
+}
+
+void AEnemyBTController::DrawDebugVision() {
+	if(!bDrawDebug) return;
+	if (!GetPawn()) return;
+
+	FVector Start = GetPawn()->GetActorLocation();
+	float HalfAngleRadians = FMath::DegreesToRadians(FieldOfView / 2);
+
+	FVector Forward = GetPawn()->GetActorForwardVector();
+
+	DrawDebugCone(
+		GetWorld(),
+		Start,
+		Forward,
+		SightRadius,
+		HalfAngleRadians,
+		HalfAngleRadians,
+		32,
+		FColor::Green,
+		false,
+		-1,
+		0,
+		1
+	);
 }

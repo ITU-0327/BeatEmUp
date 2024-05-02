@@ -54,7 +54,19 @@ public:
 	UPROPERTY()
 		APawn* TargetPlayer;
 
+	// Shooting
 	UPROPERTY(EditAnywhere, Category="Enemy Settings")
 		float Ammo = 5;
 	void Shoot();
+
+	// Alert
+	UPROPERTY(EditAnywhere, Category="Enemy Settings")
+		float AlertRadius = 1000;
+	void AlertNearbyEnemies();
+	void OnAlerted(APawn* AlertedPlayer);
+
+	// Debug
+	UPROPERTY(EditAnywhere, Category="Enemy Settings")
+		bool bDrawDebug = true;
+	void DrawDebugVision();
 };
