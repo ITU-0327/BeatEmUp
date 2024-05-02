@@ -138,7 +138,7 @@ void ABeatEmUpCharacter::ResetPunch() {
 }
 
 void ABeatEmUpCharacter::Use() {
-	FVector Start = GetActorLocation();
+	FVector Start = GetFollowCamera()->GetComponentLocation();
 	FVector End = Start + GetFollowCamera()->GetForwardVector() * UseDistance;
 
 	FHitResult HitData;
@@ -188,14 +188,15 @@ void ABeatEmUpCharacter::LaunchGrapplingHook() {
 		return;
 	}
 	
-	FVector Start = GetActorLocation();
+	FVector Start = GetFollowCamera()->GetComponentLocation();
 	FVector End = Start + GetFollowCamera()->GetForwardVector() * GrapplingDistance;
 
 	FHitResult HitData;
 	FCollisionQueryParams TraceParams;
 	TraceParams.AddIgnoredActor(this);
 	bool bHit = GetWorld()->LineTraceSingleByChannel(HitData, Start, End, ECC_Visibility, TraceParams);
-	
+
+	Start = GetActorLocation();
 	if(bEnableDebug)
 		DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 5.0f, 0, 1.0f);
 
