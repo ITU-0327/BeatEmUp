@@ -24,7 +24,7 @@ protected:
 		USceneCaptureComponent2D* SceneCaptureComponent;
 
 	UPROPERTY(EditAnywhere, Category="Settings")
-		float HeightAbovePlayer = 2500.0f;
+		float HeightAbovePlayer = 1500.0f;
 
 	UPROPERTY()
 		UInGameUI* UserWidget;
