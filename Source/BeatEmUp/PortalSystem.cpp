@@ -52,5 +52,7 @@ void APortalSystem::RecordFrame() {
 void APortalSystem::AutoEndPortal() {
 	EntryPortal->Destroy();
 	ExitPortal->Destroy();
+	if(ABeatEmUpCharacter* Player = Cast<ABeatEmUpCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)))
+		Player->ActivePortalSystem = nullptr;
 	Destroy();
 }

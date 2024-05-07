@@ -313,6 +313,14 @@ void ABeatEmUpCharacter::ExitPortal() {
 	CurrentFrameIndex = 0; 
 }
 
+void ABeatEmUpCharacter::SetPortalCooldown() {
+	GetWorld()->GetTimerManager().SetTimer(PortalCooldownTimerHandle, this, &ABeatEmUpCharacter::ResetPortal, PortalCooldown, false);
+}
+
+void ABeatEmUpCharacter::ResetPortal() {
+	bIsPortalReady = true;
+}
+
 void ABeatEmUpCharacter::TeleportTick(float DeltaTime) {
 	if(CurrentFrameIndex >= ActivePortalSystem->RecordedFrames.Num()) return;
 	
@@ -328,16 +336,8 @@ void ABeatEmUpCharacter::TeleportTick(float DeltaTime) {
 
 	if(CurrentFrameIndex >= ActivePortalSystem->RecordedFrames.Num()) {
 		bIsInPortal = false;
-        ExitPortal();
+		ExitPortal();
 	}
-}
-
-void ABeatEmUpCharacter::SetPortalCooldown() {
-	GetWorld()->GetTimerManager().SetTimer(PortalCooldownTimerHandle, this, &ABeatEmUpCharacter::ResetPortal, PortalCooldown, false);
-}
-
-void ABeatEmUpCharacter::ResetPortal() {
-	bIsPortalReady = true;
 }
 
 //////////////////////////////////////////////////////////////////////////

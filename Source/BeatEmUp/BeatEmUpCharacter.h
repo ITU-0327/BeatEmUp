@@ -171,16 +171,16 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 		APortalSystem* ActivePortalSystem;
 	UPROPERTY(EditAnywhere, Category="Portal Settings")
-		float PortalRange = 1000.0f;
+		float PortalRange = 3000.0f;
 	UPROPERTY(EditAnywhere, Category="Portal Settings")
-		float TransitionSpeed = 0.05f;
+		float TransitionSpeed = 0.01f;
 	bool bIsInPortal = false;
 	bool bIsPortalReady = true;
 	int32 CurrentFrameIndex = 0;
 	float TransitionTimer = 0.0f;
 
 	UPROPERTY(EditAnywhere, Category="Portal Settings")
-		float PortalCooldown = 60.0f;
+		float PortalCooldown = 35.0f;
 	FTimerHandle PortalCooldownTimerHandle;
 	
 	void StartPortalCreation();
