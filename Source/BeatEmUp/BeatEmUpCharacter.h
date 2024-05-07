@@ -6,6 +6,7 @@
 #include "GrapplingHook.h"
 #include "Grenade.h"
 #include "InGameUI.h"
+#include "PortalSystem.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "Windows/AllowWindowsPlatformTypes.h"
@@ -60,18 +61,21 @@ class ABeatEmUpCharacter : public ACharacter
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
     UInputAction* GrapplingAction;
 
-	/** Grappling Input Action */
+	/** Grenade Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* PickUpAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* ThrowAction;
+
+	/** Portal Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* PortalAction;
 	
 public:
 	ABeatEmUpCharacter();
 	
 
 protected:
-
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
 
@@ -160,6 +164,32 @@ public:
 		TSubclassOf<UInGameUI> InGameUIClass;
 	UPROPERTY()
 		UInGameUI* InGameUI;
+
+	// Portal
+	UPROPERTY(EditAnywhere, Category="Portal Settings")
+		TSubclassOf<APortalSystem> PortalSystemClass;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+		APortalSystem* ActivePortalSystem;
+	UPROPERTY(EditAnywhere, Category="Portal Settings")
+		float PortalRange = 1000.0f;
+	UPROPERTY(EditAnywhere, Category="Portal Settings")
+		float TransitionSpeed = 0.05f;
+	bool bIsInPortal = false;
+	bool bIsPortalReady = true;
+	int32 CurrentFrameIndex = 0;
+	float TransitionTimer = 0.0f;
+
+	UPROPERTY(EditAnywhere, Category="Portal Settings")
+		float PortalCooldown = 60.0f;
+	FTimerHandle PortalCooldownTimerHandle;
+	
+	void StartPortalCreation();
+	void EndPortalCreation();
+	void EnterPortal();
+	void ExitPortal();
+	void SetPortalCooldown();
+	void ResetPortal();
+	void TeleportTick(float DeltaTime);
 		
 	// Helper Functions
 	void DealDamage(float Damage);

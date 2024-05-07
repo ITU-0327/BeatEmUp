@@ -68,19 +68,27 @@ void ABeatEmUpCharacter::Tick(float DeltaTime) {
 	if(GetWorld()->GetTimerManager().TimerExists(PunchTimerHandle))
 		InGameUI->UpdateValues();
 
-	if(!bIsGrappling) return;
+	if(bIsGrappling) {
+		FVector Direction = (GrapplingHookTarget - GetActorLocation()).GetSafeNormal();
+        GrapplingForce += Direction * GrapplingHookAcceleration * DeltaTime;
+        GrapplingForce = GrapplingForce.GetClampedToMaxSize(MaxGrapplingSpeed);
+    
+        GetCharacterMovement()->Velocity = GrapplingForce;
+    
+        if(FVector::Dist(GetActorLocation(), GrapplingHookTarget) < 100.f) {
+        	UE_LOG(LogTemp, Warning, TEXT("Stopping Grappling Hook! Character is close enough!"));
+        	StopGrapplingHook();
+        }
+	}
 
-	FVector Direction = (GrapplingHookTarget - GetActorLocation()).GetSafeNormal();
-	GrapplingForce += Direction * GrapplingHookAcceleration * DeltaTime;
-	GrapplingForce = GrapplingForce.GetClampedToMaxSize(MaxGrapplingSpeed);
-
-	GetCharacterMovement()->Velocity = GrapplingForce;
-
-	if(FVector::Dist(GetActorLocation(), GrapplingHookTarget) < 100.f) {
-		UE_LOG(LogTemp, Warning, TEXT("Stopping Grappling Hook! Character is close enough!"));
-		StopGrapplingHook();
+	if (ActivePortalSystem && !ActivePortalSystem->ExitPortal && FVector::Dist(GetActorLocation(), ActivePortalSystem->EntryPortal->GetActorLocation()) > PortalRange) {
+		EndPortalCreation();
+		UE_LOG(LogTemp, Warning, TEXT("Character is too far from the portal!, the distance is %s"), *FString::SanitizeFloat(FVector::Dist(GetActorLocation(), ActivePortalSystem->EntryPortal->GetActorLocation())));
 	}
 		
+
+	if (bIsInPortal && ActivePortalSystem)
+		TeleportTick(DeltaTime);
 }
 
 void ABeatEmUpCharacter::BeginPlay()
@@ -259,10 +267,81 @@ void ABeatEmUpCharacter::ThrowGrenade() {
 		Grenade->Initialize(ThrowDirection, bEnableDebug);
 }
 
+//////////////////////////////////////////////////////////////////////////
+// Portal
+void ABeatEmUpCharacter::StartPortalCreation() {
+	if(!bIsPortalReady) {
+		UE_LOG(LogTemp, Error, TEXT("Portal not ready!, %s seoconds left."), *FString::SanitizeFloat(GetWorld()->GetTimerManager().GetTimerRemaining(PortalCooldownTimerHandle)));
+		return;
+	}
+	if(bIsInPortal) return;
+	
+	if(!ActivePortalSystem) {
+		ActivePortalSystem = GetWorld()->SpawnActor<APortalSystem>(PortalSystemClass);
+		ActivePortalSystem->StartPortal(GetActorLocation(), GetActorRotation());
+		SetPortalCooldown();
+	}
+	else if(ActivePortalSystem->EntryPortal && !ActivePortalSystem->ExitPortal)
+		EndPortalCreation();
+	else
+		UE_LOG(LogTemp, Error, TEXT("Something went wrong!"));
+}
+
+void ABeatEmUpCharacter::EndPortalCreation() {
+	if(!ActivePortalSystem) return;
+	if(!bIsPortalReady) return;
+	if(bIsInPortal) return;
+
+	bIsPortalReady = false;
+	ActivePortalSystem->EndPortal(GetActorLocation(), GetActorRotation());
+}
+
+void ABeatEmUpCharacter::EnterPortal() {
+	if(!ActivePortalSystem) return;
+	if(bIsInPortal) return;
+	
+	bIsInPortal = true;
+	CurrentFrameIndex = 0;
+	TransitionTimer = 0.0f;
+}
+
+void ABeatEmUpCharacter::ExitPortal() {
+	if(!ActivePortalSystem) return;
+	if(!bIsInPortal) return;
+	
+	bIsInPortal = false;
+	CurrentFrameIndex = 0; 
+}
+
+void ABeatEmUpCharacter::TeleportTick(float DeltaTime) {
+	if(CurrentFrameIndex >= ActivePortalSystem->RecordedFrames.Num()) return;
+	
+	TransitionTimer += DeltaTime;
+	if(TransitionTimer < TransitionSpeed) return;
+	
+	const FFrameData& Frame = ActivePortalSystem->RecordedFrames[CurrentFrameIndex];
+	SetActorLocation(Frame.Location);
+	SetActorRotation(Frame.Rotation);
+
+	CurrentFrameIndex++;
+	TransitionTimer = 0.0f;
+
+	if(CurrentFrameIndex >= ActivePortalSystem->RecordedFrames.Num()) {
+		bIsInPortal = false;
+        ExitPortal();
+	}
+}
+
+void ABeatEmUpCharacter::SetPortalCooldown() {
+	GetWorld()->GetTimerManager().SetTimer(PortalCooldownTimerHandle, this, &ABeatEmUpCharacter::ResetPortal, PortalCooldown, false);
+}
+
+void ABeatEmUpCharacter::ResetPortal() {
+	bIsPortalReady = true;
+}
 
 //////////////////////////////////////////////////////////////////////////
 // Input
-
 void ABeatEmUpCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	// Set up action bindings
@@ -290,6 +369,9 @@ void ABeatEmUpCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		// Throwing Grenade
 		EnhancedInputComponent->BindAction(PickUpAction, ETriggerEvent::Started, this, &ABeatEmUpCharacter::PickUpGrenade);
 		EnhancedInputComponent->BindAction(ThrowAction, ETriggerEvent::Started, this, &ABeatEmUpCharacter::ThrowGrenade);
+
+		// Creating Portal
+		EnhancedInputComponent->BindAction(PortalAction, ETriggerEvent::Started, this, &ABeatEmUpCharacter::StartPortalCreation);
 	}
 	else {
 		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
