@@ -8,7 +8,7 @@ struct FFrameData {
 	GENERATED_BODY()
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Frame Data")
-	FVector Position;
+	FVector Location;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Frame Data")
 	FRotator Rotation;
@@ -16,8 +16,8 @@ struct FFrameData {
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Frame Data")
 	float Timestamp;
 
-	FFrameData() : Position(FVector::ZeroVector), Rotation(FRotator::ZeroRotator), Timestamp(0.0f) {}
+	FFrameData() : Location(FVector::ZeroVector), Rotation(FRotator::ZeroRotator), Timestamp(0.0f) {}
 
 	FFrameData(FVector InPosition, FRotator InRotation, float InTimestamp)
-		: Position(InPosition), Rotation(InRotation), Timestamp(InTimestamp) {}
+		: Location(InPosition), Rotation(InRotation), Timestamp(InTimestamp) {}
 };
