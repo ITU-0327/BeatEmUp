@@ -76,8 +76,11 @@ void ABeatEmUpCharacter::Tick(float DeltaTime) {
 
 	GetCharacterMovement()->Velocity = GrapplingForce;
 
-	if(FVector::Dist(GetActorLocation(), GrapplingHookTarget) < 100.f)
+	if(FVector::Dist(GetActorLocation(), GrapplingHookTarget) < 100.f) {
+		UE_LOG(LogTemp, Warning, TEXT("Stopping Grappling Hook! Character is close enough!"));
 		StopGrapplingHook();
+	}
+		
 }
 
 void ABeatEmUpCharacter::BeginPlay()
@@ -185,6 +188,7 @@ void ABeatEmUpCharacter::DealDamage(float Damage) {
 void ABeatEmUpCharacter::LaunchGrapplingHook() {
 	if(bIsGrapplingHookActive) {
 		UE_LOG(LogTemp, Warning, TEXT("Already Activated!"));
+		StopGrapplingHook();
 		return;
 	}
 	
@@ -211,6 +215,7 @@ void ABeatEmUpCharacter::LaunchGrapplingHook() {
 
 	if (AGrapplingHook* GrapplingHook = GetWorld()->SpawnActor<AGrapplingHook>(GrapplingHookClass, Start, LaunchRotation)) {
 		GrapplingHook->Launch(HitData.ImpactPoint, this);
+		LaunchedGrapplingHook = GrapplingHook;
 		bIsGrapplingHookActive = true;
 	}
 }
@@ -230,6 +235,8 @@ void ABeatEmUpCharacter::StopGrapplingHook() {
 
 	bIsGrappling = false;
 	bIsGrapplingHookActive = false;
+	LaunchedGrapplingHook->Destroy();
+	LaunchedGrapplingHook = nullptr;
 
 	GetCharacterMovement()->SetMovementMode(MOVE_Falling);
 }

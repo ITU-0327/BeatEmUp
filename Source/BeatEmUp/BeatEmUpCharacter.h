@@ -134,6 +134,8 @@ public:
 	UPROPERTY(EditAnywhere, Category="Grappling Settings")
 		float MaxGrapplingSpeed = 2000.0f;
 	
+	UPROPERTY()
+		AGrapplingHook* LaunchedGrapplingHook = nullptr;
 	FVector GrapplingHookTarget;
 	FVector GrapplingForce;
 	bool bIsGrappling = false;

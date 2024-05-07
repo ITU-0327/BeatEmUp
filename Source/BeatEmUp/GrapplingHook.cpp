@@ -47,7 +47,7 @@ void AGrapplingHook::Tick(float DeltaTime)
 	const FVector HookLocation = GetActorLocation();
 	ABeatEmUpCharacter* Character = Cast<ABeatEmUpCharacter>(Initiator);
 
-	if(Character == nullptr) return;
+	if(!Character) return;
 
 	const float DistanceToTarget = FVector::Dist(HookLocation, TargetLocation);
 	const float DistanceToCharacter = FVector::Dist(HookLocation, Character->GetActorLocation());
@@ -62,9 +62,8 @@ void AGrapplingHook::Tick(float DeltaTime)
         Character->StartGrapplingHook(TargetLocation);
     
     if(DistanceToCharacter < AttachThreshold ||
-    	FVector::DotProduct(Character->GetActorForwardVector(), (HookLocation - Character->GetActorLocation()).GetSafeNormal()) <= 0) {
+    	FVector::DotProduct(Character->GetActorForwardVector(), (HookLocation - Character->GetActorLocation()).GetSafeNormal()) < 0) {
     	Character->StopGrapplingHook();
-    	Destroy();
     	return;
     }
 	
