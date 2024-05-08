@@ -308,7 +308,6 @@ void ABeatEmUpCharacter::EnterPortal() {
 	
 	bIsInPortal = true;
 	CurrentSnapshotIndex = 0;
-	TransitionTimer = 0.0f;
 	TeleportTrailComponent->ActivateSystem();
 }
 
@@ -332,16 +331,17 @@ void ABeatEmUpCharacter::ResetPortal() {
 void ABeatEmUpCharacter::TeleportTick(float DeltaTime) {
 	if(CurrentSnapshotIndex >= ActivePortalSystem->TransformSnapshots.Num()) return;
 	
-	TransitionTimer += DeltaTime;
-	if(TransitionTimer < TransitionSpeed) return;
-	
 	SetActorTransform(ActivePortalSystem->TransformSnapshots[CurrentSnapshotIndex].Transform);
 
-	CurrentSnapshotIndex++;
-	TransitionTimer = 0.0f;
-
-	if(CurrentSnapshotIndex >= ActivePortalSystem->TransformSnapshots.Num())
+	CurrentSnapshotIndex += SpeedMultiplier;
+	
+	if (CurrentSnapshotIndex >= ActivePortalSystem->TransformSnapshots.Num()) {
+		CurrentSnapshotIndex = ActivePortalSystem->TransformSnapshots.Num() - 1;
+		SetActorTransform(ActivePortalSystem->TransformSnapshots[CurrentSnapshotIndex].Transform);
 		ExitPortal();
+	}
+	else
+		SetActorTransform(ActivePortalSystem->TransformSnapshots[CurrentSnapshotIndex].Transform);
 }
 
 //////////////////////////////////////////////////////////////////////////

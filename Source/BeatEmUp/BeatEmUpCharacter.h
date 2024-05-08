@@ -173,11 +173,10 @@ public:
 	UPROPERTY(EditAnywhere, Category="Portal Settings")
 		float PortalRange = 3000.0f;
 	UPROPERTY(EditAnywhere, Category="Portal Settings")
-		float TransitionSpeed = 0.01f;
+		int SpeedMultiplier = 2;
 	bool bIsInPortal = false;
 	bool bIsPortalReady = true;
 	int32 CurrentSnapshotIndex = 0;
-	float TransitionTimer = 0.0f;
 
 	UPROPERTY(EditAnywhere, Category="Portal Settings")
 		float PortalCooldown = 35.0f;
