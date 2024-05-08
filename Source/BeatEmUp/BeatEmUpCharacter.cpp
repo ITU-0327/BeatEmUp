@@ -16,6 +16,7 @@
 #include "Interactable.h"
 #include "DrawDebugHelpers.h"
 #include "Grenade.h"
+#include "Particles/ParticleSystemComponent.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -57,6 +58,11 @@ ABeatEmUpCharacter::ABeatEmUpCharacter()
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
+
+	// Particle system for Trail Effect
+	TeleportTrailComponent = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Teleport Trail"));
+	TeleportTrailComponent->SetupAttachment(RootComponent);
+	TeleportTrailComponent->bAutoActivate = false;
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
@@ -303,14 +309,16 @@ void ABeatEmUpCharacter::EnterPortal() {
 	bIsInPortal = true;
 	CurrentSnapshotIndex = 0;
 	TransitionTimer = 0.0f;
+	TeleportTrailComponent->ActivateSystem();
 }
 
 void ABeatEmUpCharacter::ExitPortal() {
 	if(!ActivePortalSystem) return;
 	if(!bIsInPortal) return;
-	
+
 	bIsInPortal = false;
-	CurrentSnapshotIndex = 0; 
+	CurrentSnapshotIndex = 0;
+	TeleportTrailComponent->DeactivateSystem();
 }
 
 void ABeatEmUpCharacter::SetPortalCooldown() {
@@ -332,10 +340,8 @@ void ABeatEmUpCharacter::TeleportTick(float DeltaTime) {
 	CurrentSnapshotIndex++;
 	TransitionTimer = 0.0f;
 
-	if(CurrentSnapshotIndex >= ActivePortalSystem->TransformSnapshots.Num()) {
-		bIsInPortal = false;
+	if(CurrentSnapshotIndex >= ActivePortalSystem->TransformSnapshots.Num())
 		ExitPortal();
-	}
 }
 
 //////////////////////////////////////////////////////////////////////////

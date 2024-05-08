@@ -182,6 +182,8 @@ public:
 	UPROPERTY(EditAnywhere, Category="Portal Settings")
 		float PortalCooldown = 35.0f;
 	FTimerHandle PortalCooldownTimerHandle;
+	UPROPERTY(EditAnywhere, Category="Portal Settings")
+		UParticleSystemComponent* TeleportTrailComponent;
 	
 	void StartPortalCreation();
 	void EndPortalCreation();
