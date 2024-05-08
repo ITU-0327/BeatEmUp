@@ -176,7 +176,7 @@ public:
 		float TransitionSpeed = 0.01f;
 	bool bIsInPortal = false;
 	bool bIsPortalReady = true;
-	int32 CurrentFrameIndex = 0;
+	int32 CurrentSnapshotIndex = 0;
 	float TransitionTimer = 0.0f;
 
 	UPROPERTY(EditAnywhere, Category="Portal Settings")

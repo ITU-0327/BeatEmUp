@@ -22,7 +22,7 @@ void APortalSystem::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 
 	if(EntryPortal && !ExitPortal)
-		RecordFrame();
+		RecordSnapshot();
 }
 
 void APortalSystem::StartPortal(const FVector& EntryLocation, const FRotator& EntryRotation) {
@@ -44,9 +44,9 @@ void APortalSystem::EndPortal(const FVector& ExitLocation, const FRotator& ExitR
 	GetWorld()->GetTimerManager().SetTimer(PortalTimerHandle, this, &APortalSystem::AutoEndPortal, PortalDuration, false);
 }
 
-void APortalSystem::RecordFrame() {
+void APortalSystem::RecordSnapshot() {
 	if(const ABeatEmUpCharacter* Player = Cast<ABeatEmUpCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)))
-		RecordedFrames.Add(FFrameData(Player->GetActorLocation(), Player->GetActorRotation(), GetWorld()->GetTimeSeconds()));
+		TransformSnapshots.Add(FTransformSnapshot(Player->GetActorTransform()));
 }
 
 void APortalSystem::AutoEndPortal() {

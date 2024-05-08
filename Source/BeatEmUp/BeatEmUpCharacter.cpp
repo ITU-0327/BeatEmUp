@@ -301,7 +301,7 @@ void ABeatEmUpCharacter::EnterPortal() {
 	if(bIsInPortal) return;
 	
 	bIsInPortal = true;
-	CurrentFrameIndex = 0;
+	CurrentSnapshotIndex = 0;
 	TransitionTimer = 0.0f;
 }
 
@@ -310,7 +310,7 @@ void ABeatEmUpCharacter::ExitPortal() {
 	if(!bIsInPortal) return;
 	
 	bIsInPortal = false;
-	CurrentFrameIndex = 0; 
+	CurrentSnapshotIndex = 0; 
 }
 
 void ABeatEmUpCharacter::SetPortalCooldown() {
@@ -322,19 +322,17 @@ void ABeatEmUpCharacter::ResetPortal() {
 }
 
 void ABeatEmUpCharacter::TeleportTick(float DeltaTime) {
-	if(CurrentFrameIndex >= ActivePortalSystem->RecordedFrames.Num()) return;
+	if(CurrentSnapshotIndex >= ActivePortalSystem->TransformSnapshots.Num()) return;
 	
 	TransitionTimer += DeltaTime;
 	if(TransitionTimer < TransitionSpeed) return;
 	
-	const FFrameData& Frame = ActivePortalSystem->RecordedFrames[CurrentFrameIndex];
-	SetActorLocation(Frame.Location);
-	SetActorRotation(Frame.Rotation);
+	SetActorTransform(ActivePortalSystem->TransformSnapshots[CurrentSnapshotIndex].Transform);
 
-	CurrentFrameIndex++;
+	CurrentSnapshotIndex++;
 	TransitionTimer = 0.0f;
 
-	if(CurrentFrameIndex >= ActivePortalSystem->RecordedFrames.Num()) {
+	if(CurrentSnapshotIndex >= ActivePortalSystem->TransformSnapshots.Num()) {
 		bIsInPortal = false;
 		ExitPortal();
 	}
