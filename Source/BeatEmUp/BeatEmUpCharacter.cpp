@@ -94,7 +94,7 @@ void ABeatEmUpCharacter::Tick(float DeltaTime) {
 		
 
 	if (bIsInPortal && ActivePortalSystem)
-		TeleportTick(DeltaTime);
+		TeleportTick();
 }
 
 void ABeatEmUpCharacter::BeginPlay()
@@ -284,7 +284,7 @@ void ABeatEmUpCharacter::StartPortalCreation() {
 	
 	if(!ActivePortalSystem) {
 		ActivePortalSystem = GetWorld()->SpawnActor<APortalSystem>(PortalSystemClass);
-		ActivePortalSystem->StartPortal(GetActorLocation(), GetActorRotation());
+		ActivePortalSystem->CreateEntryPortal(GetActorLocation(), GetActorRotation());
 		SetPortalCooldown();
 	}
 	else if(ActivePortalSystem->EntryPortal && !ActivePortalSystem->ExitPortal)
@@ -299,16 +299,24 @@ void ABeatEmUpCharacter::EndPortalCreation() {
 	if(bIsInPortal) return;
 
 	bIsPortalReady = false;
-	ActivePortalSystem->EndPortal(GetActorLocation(), GetActorRotation());
+	ActivePortalSystem->CreateExitPortal(GetActorLocation(), GetActorRotation());
 }
 
-void ABeatEmUpCharacter::EnterPortal() {
+void ABeatEmUpCharacter::EnterPortal(const APortal* Portal) {
 	if(!ActivePortalSystem) return;
 	if(bIsInPortal) return;
 	
 	bIsInPortal = true;
-	CurrentSnapshotIndex = 0;
+	
 	TeleportTrailComponent->ActivateSystem();
+	if (Portal == Cast<APortal>(ActivePortalSystem->ExitPortal)) {
+		CurrentSnapshotIndex = ActivePortalSystem->TransformSnapshots.Num() - 1;
+		CurrentSpeedMultiplier = -SpeedMultiplier;
+	}
+	else {
+		CurrentSnapshotIndex = 0;
+		CurrentSpeedMultiplier = SpeedMultiplier;
+	}
 }
 
 void ABeatEmUpCharacter::ExitPortal() {
@@ -328,20 +336,23 @@ void ABeatEmUpCharacter::ResetPortal() {
 	bIsPortalReady = true;
 }
 
-void ABeatEmUpCharacter::TeleportTick(float DeltaTime) {
-	if(CurrentSnapshotIndex >= ActivePortalSystem->TransformSnapshots.Num()) return;
-	
-	SetActorTransform(ActivePortalSystem->TransformSnapshots[CurrentSnapshotIndex].Transform);
-
-	CurrentSnapshotIndex += SpeedMultiplier;
-	
-	if (CurrentSnapshotIndex >= ActivePortalSystem->TransformSnapshots.Num()) {
-		CurrentSnapshotIndex = ActivePortalSystem->TransformSnapshots.Num() - 1;
-		SetActorTransform(ActivePortalSystem->TransformSnapshots[CurrentSnapshotIndex].Transform);
+void ABeatEmUpCharacter::TeleportTick() {
+	if ((CurrentSpeedMultiplier > 0 && CurrentSnapshotIndex >= ActivePortalSystem->TransformSnapshots.Num()) ||
+		(CurrentSpeedMultiplier < 0 && CurrentSnapshotIndex < 0)) {
 		ExitPortal();
+		return;
 	}
-	else
-		SetActorTransform(ActivePortalSystem->TransformSnapshots[CurrentSnapshotIndex].Transform);
+
+	FTransform Snapshot = ActivePortalSystem->TransformSnapshots[CurrentSnapshotIndex].Transform;
+
+	if (CurrentSpeedMultiplier < 0) {
+		FRotator NewRotation = Snapshot.GetRotation().Rotator();
+		NewRotation.Yaw += 180.0f;
+		Snapshot.SetRotation(NewRotation.Quaternion());
+	}
+
+	SetActorTransform(Snapshot);
+	CurrentSnapshotIndex += CurrentSpeedMultiplier;
 }
 
 //////////////////////////////////////////////////////////////////////////

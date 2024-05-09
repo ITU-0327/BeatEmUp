@@ -25,15 +25,13 @@ void APortalSystem::Tick(float DeltaTime) {
 		RecordSnapshot();
 }
 
-void APortalSystem::StartPortal(const FVector& EntryLocation, const FRotator& EntryRotation) {
+void APortalSystem::CreateEntryPortal(const FVector& EntryLocation, const FRotator& EntryRotation) {
 	EntryPortal = GetWorld()->SpawnActor(PortalClass, &EntryLocation, &EntryRotation, FActorSpawnParameters());
-	if(!EntryPortal) {
+	if(!EntryPortal)
 		UE_LOG(LogTemp, Error, TEXT("Failed to spawn entry portal"));
-		return;
-	}
 }
 
-void APortalSystem::EndPortal(const FVector& ExitLocation, const FRotator& ExitRotation) {
+void APortalSystem::CreateExitPortal(const FVector& ExitLocation, const FRotator& ExitRotation) {
 	ExitPortal = GetWorld()->SpawnActor(PortalClass, &ExitLocation, &ExitRotation, FActorSpawnParameters());
 	if(!ExitPortal) {
 		UE_LOG(LogTemp, Error, TEXT("Failed to spawn exit portal"));

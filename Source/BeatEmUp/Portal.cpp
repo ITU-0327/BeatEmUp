@@ -32,6 +32,6 @@ void APortal::Tick(float DeltaTime) {
 void APortal::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
 	if(!bIsPortalActive) return;
 	if(ABeatEmUpCharacter* Player = Cast<ABeatEmUpCharacter>(OtherActor))
-		Player->EnterPortal();
+		Player->EnterPortal(this);
 	UE_LOG(LogTemp, Warning, TEXT("Portal(%s) Overlap with %s"), *GetName(), *OtherActor->GetName());
 }

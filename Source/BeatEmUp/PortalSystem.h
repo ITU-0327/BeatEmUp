@@ -39,8 +39,8 @@ public:
 
 	TArray<FTransformSnapshot> TransformSnapshots;
 
-	void StartPortal(const FVector& EntryLocation, const FRotator& EntryRotation);
-	void EndPortal(const FVector& ExitLocation, const FRotator& ExitRotation);
+	void CreateEntryPortal(const FVector& EntryLocation, const FRotator& EntryRotation);
+	void CreateExitPortal(const FVector& ExitLocation, const FRotator& ExitRotation);
 	void RecordSnapshot();
 
 private:

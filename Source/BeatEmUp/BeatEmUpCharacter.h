@@ -174,6 +174,7 @@ public:
 		float PortalRange = 3000.0f;
 	UPROPERTY(EditAnywhere, Category="Portal Settings")
 		int SpeedMultiplier = 2;
+	int CurrentSpeedMultiplier = SpeedMultiplier;
 	bool bIsInPortal = false;
 	bool bIsPortalReady = true;
 	int32 CurrentSnapshotIndex = 0;
@@ -186,11 +187,11 @@ public:
 	
 	void StartPortalCreation();
 	void EndPortalCreation();
-	void EnterPortal();
+	void EnterPortal(const APortal* Portal);
 	void ExitPortal();
 	void SetPortalCooldown();
 	void ResetPortal();
-	void TeleportTick(float DeltaTime);
+	void TeleportTick();
 		
 	// Helper Functions
 	void DealDamage(float Damage);
