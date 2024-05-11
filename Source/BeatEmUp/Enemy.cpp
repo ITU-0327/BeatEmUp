@@ -16,6 +16,11 @@ AEnemy::AEnemy() {
 
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 	Player = nullptr;
+
+	HealthBarWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthBarWidgetComponent"));
+	HealthBarWidgetComponent->SetupAttachment(GetRootComponent());
+	HealthBarWidgetComponent->SetWidgetSpace(EWidgetSpace::World);
+	HealthBarWidgetComponent->SetDrawSize(FVector2D(200, 50));
 }
 
 // Called when the game starts or when spawned
@@ -25,6 +30,29 @@ void AEnemy::BeginPlay() {
 	Player = Cast<ABeatEmUpCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	GetCharacterMovement()->bOrientRotationToMovement = true;  // Always rotates to face the direction that it's moving in.
 	GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &AEnemy::OnHit);
+
+	if(EnemyStatusWidgetClass) {
+		HealthBarWidgetComponent->SetWidgetClass(EnemyStatusWidgetClass);
+		HealthBarWidgetComponent->SetRelativeLocation(FVector(0, 0, 105));
+	}
+	
+	HealthBar = Cast<UEnemyStatusWidget>(HealthBarWidgetComponent->GetUserWidgetObject());
+	if(HealthBar) {
+		HealthBar->Enemy = this;
+		HealthBar->UpdateValues();
+		HealthBar->HideWarningIcon();
+	}
+}
+
+void AEnemy::UpdateWidgetRotation() const {
+	if(!HealthBarWidgetComponent) return;
+	if(!GetWorld()->GetFirstPlayerController()) return;
+	if(!GetWorld()->GetFirstPlayerController()->PlayerCameraManager) return;
+	
+	const FVector CameraLocation = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->GetCameraLocation();
+	const FVector Direction = CameraLocation - HealthBarWidgetComponent->GetComponentLocation();
+	const FRotator NewRot = FRotationMatrix::MakeFromX(Direction).Rotator();
+	HealthBarWidgetComponent->SetWorldRotation(NewRot);
 }
 
 void AEnemy::Shoot(FVector Direction) {
@@ -38,6 +66,8 @@ void AEnemy::Shoot(FVector Direction) {
 // Called every frame
 void AEnemy::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
+
+	UpdateWidgetRotation();
 }
 
 // Called to bind functionality to input
@@ -47,6 +77,8 @@ void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 
 void AEnemy::DealDamage(float Damage) {
 	CurrentHealth = FMath::Clamp(CurrentHealth - Damage, 0.f, MaxHealth);
+
+	if(HealthBar) HealthBar->UpdateValues();
 
 	UDamageTextUI* SpawnedDamage = Cast<UDamageTextUI>(CreateWidget(GetGameInstance(), DamageTextClass));
 	UGameplayStatics::ProjectWorldToScreen(GetWorld()->GetFirstPlayerController(), GetMesh()->GetComponentLocation(), SpawnedDamage->CurrentLocation);
@@ -87,3 +119,5 @@ void AEnemy::StopRagdoll() {
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0, 0, -90), FRotator(0, -90, 0));
 	GetCapsuleComponent()->SetCollisionProfileName("Pawn");
 }
+
+

@@ -6,6 +6,8 @@
 #include "BeatEmUpCharacter.h"
 #include "Bullet.h"
 #include "DamageTextUI.h"
+#include "EnemyStatusWidget.h"
+#include "Components/WidgetComponent.h"
 #include "GameFramework/Character.h"
 #include "Enemy.generated.h"
 
@@ -39,6 +41,15 @@ public:
 	UPROPERTY(EditAnywhere, Category="Enemy Settings")
 		TSubclassOf<UDamageTextUI> DamageTextClass;
 	FTimerHandle RagdollTimerHandle;
+
+	// Health Bar
+	UPROPERTY(EditAnywhere, Category="Enemy Settings")
+		TSubclassOf<UEnemyStatusWidget> EnemyStatusWidgetClass;
+	UPROPERTY()
+		UEnemyStatusWidget* HealthBar;
+	UPROPERTY()
+		UWidgetComponent* HealthBarWidgetComponent;
+	void UpdateWidgetRotation() const;
 
 	// Range Attack
 	UPROPERTY(EditAnywhere, Category="Enemy Settings")

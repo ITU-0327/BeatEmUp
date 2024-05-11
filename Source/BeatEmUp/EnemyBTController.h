@@ -68,5 +68,5 @@ public:
 	// Debug
 	UPROPERTY(EditAnywhere, Category="Enemy Settings")
 		bool bDrawDebug = true;
-	void DrawDebugVision();
+	void DrawDebugVision() const;
 };

@@ -69,16 +69,22 @@ void AEnemyBTController::OnSensesUpdated(AActor* UpdatedActor, FAIStimulus Stimu
 		BlackboardComponent->SetValueAsBool("ChasePlayer", true);
 		BlackboardComponent->SetValueAsVector("PlayerLocation", TargetPlayer->GetActorLocation());
 
+		if(const AEnemy* Enemy = Cast<AEnemy>(GetPawn()))
+			Enemy->HealthBar->ShowWarningIcon();
+
 		AlertNearbyEnemies();
 	}
 	else {
 		TargetPlayer = nullptr;
 		BlackboardComponent->SetValueAsBool("ChasePlayer", false);
+
+		if(const AEnemy* Enemy = Cast<AEnemy>(GetPawn()))
+			Enemy->HealthBar->HideWarningIcon();
 	}
 }
 
 void AEnemyBTController::Shoot() {
-	FVector ShootDirection = TargetPlayer->GetActorLocation() - GetPawn()->GetActorLocation();
+	const FVector ShootDirection = TargetPlayer->GetActorLocation() - GetPawn()->GetActorLocation();
 	Cast<AEnemy>(GetPawn())->Shoot(ShootDirection);
 	Ammo--;
 	BlackboardComponent->SetValueAsBool("HasAmmo", Ammo > 0);
@@ -98,7 +104,7 @@ void AEnemyBTController::AlertNearbyEnemies() {
 		QueryParams
 	);
 
-	for (FOverlapResult Result : OverlapResults) {
+	for(FOverlapResult Result : OverlapResults) {
 		APawn* EnemyPawn = Cast<APawn>(Result.GetActor());
 		if(!EnemyPawn) continue;
 		if(EnemyPawn == GetPawn()) continue;
@@ -112,9 +118,12 @@ void AEnemyBTController::OnAlerted(APawn* AlertedPlayer) {
 	TargetPlayer = AlertedPlayer;
 	BlackboardComponent->SetValueAsBool("ChasePlayer", true);
 	BlackboardComponent->SetValueAsVector("PlayerLocation", TargetPlayer->GetActorLocation());
+
+	if(const AEnemy* Enemy = Cast<AEnemy>(GetPawn()))
+		Enemy->HealthBar->ShowWarningIcon();
 }
 
-void AEnemyBTController::DrawDebugVision() {
+void AEnemyBTController::DrawDebugVision() const {
 	if(!bDrawDebug) return;
 	if (!GetPawn()) return;
 
