@@ -45,15 +45,11 @@ AWreckingBall::AWreckingBall() {
 }
 
 // Called when the game starts or when spawned
-void AWreckingBall::BeginPlay()
-{	Super::BeginPlay();
-	
+void AWreckingBall::BeginPlay() {
+	Super::BeginPlay();
 }
 
 // Called every frame
-void AWreckingBall::Tick(float DeltaTime)
-{
+void AWreckingBall::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
-
 }
-
