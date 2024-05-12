@@ -10,6 +10,7 @@ APortal::APortal() {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	// Create and configure the portal mesh with collision properties
 	PortalMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Portal Mesh"));
 	PortalMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	PortalMesh->SetCollisionResponseToAllChannels(ECR_Ignore);
@@ -31,6 +32,8 @@ void APortal::Tick(float DeltaTime) {
 
 void APortal::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
 	if(!bIsPortalActive) return;
+
+	// Check if the overlapping actor is a player character
 	if(ABeatEmUpCharacter* Player = Cast<ABeatEmUpCharacter>(OtherActor))
 		Player->EnterPortal(this);
 	UE_LOG(LogTemp, Warning, TEXT("Portal(%s) Overlap with %s"), *GetName(), *OtherActor->GetName());

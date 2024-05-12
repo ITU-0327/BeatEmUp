@@ -21,6 +21,7 @@ void APortalSystem::BeginPlay() {
 void APortalSystem::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 
+	// Continuously record the player's position before the exit portal is created
 	if(EntryPortal && !ExitPortal)
 		RecordSnapshot();
 }
@@ -39,6 +40,8 @@ void APortalSystem::CreateExitPortal(const FVector& ExitLocation, const FRotator
 	}
 	Cast<APortal>(EntryPortal)->bIsPortalActive = true;
 	Cast<APortal>(ExitPortal)->bIsPortalActive = true;
+
+	// Set a timer to automatically end the portal session after a duration
 	GetWorld()->GetTimerManager().SetTimer(PortalTimerHandle, this, &APortalSystem::AutoEndPortal, PortalDuration, false);
 }
 
@@ -50,6 +53,8 @@ void APortalSystem::RecordSnapshot() {
 void APortalSystem::AutoEndPortal() {
 	EntryPortal->Destroy();
 	ExitPortal->Destroy();
+
+	// Clear the active portal system from the player character
 	if(ABeatEmUpCharacter* Player = Cast<ABeatEmUpCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)))
 		Player->ActivePortalSystem = nullptr;
 	Destroy();

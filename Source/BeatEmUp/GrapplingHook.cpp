@@ -11,6 +11,7 @@ AGrapplingHook::AGrapplingHook() {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	// Create and configure the hook mesh with collision properties
 	HookMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Hook Mesh"));
 	HookMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	HookMesh->SetCollisionResponseToAllChannels(ECR_Block);
@@ -18,6 +19,7 @@ AGrapplingHook::AGrapplingHook() {
 	HookMesh->OnComponentHit.AddDynamic(this, &AGrapplingHook::OnHit);
 	RootComponent = HookMesh;
 	
+	// Setup the cable component for visual representation of the grappling hook cable
 	CableComponent = CreateDefaultSubobject<UCableComponent>(TEXT("Cable"));
 	CableComponent->SetupAttachment(RootComponent);
 	CableComponent->SetVisibility(true);
@@ -25,6 +27,7 @@ AGrapplingHook::AGrapplingHook() {
 	CableComponent->NumSegments = 1;
 	CableComponent->CableWidth = 2;
 
+	// Configure the projectile movement for the hook
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("Projectile Movement"));
 	ProjectileMovement->UpdatedComponent = RootComponent;
 	ProjectileMovement->InitialSpeed = InitFlingSpeed;
@@ -52,6 +55,7 @@ void AGrapplingHook::Tick(float DeltaTime)
 	const float DistanceToTarget = FVector::Dist(HookLocation, TargetLocation);
 	const float DistanceToCharacter = FVector::Dist(HookLocation, Character->GetActorLocation());
 
+	// Determine if the hook should start retracting
 	if(!bRetracting) {
 		if(DistanceToTarget < AttachThreshold)
 			bRetracting = true;
@@ -61,14 +65,17 @@ void AGrapplingHook::Tick(float DeltaTime)
     if(!Character->bIsGrappling)
         Character->StartGrapplingHook(TargetLocation);
     
-    if(DistanceToCharacter < AttachThreshold ||
+	// Stop grappling if the character is too close or facing away from the hook
+	if(DistanceToCharacter < AttachThreshold ||
     	FVector::DotProduct(Character->GetActorForwardVector(), (HookLocation - Character->GetActorLocation()).GetSafeNormal()) < 0) {
     	Character->StopGrapplingHook();
     	return;
     }
 	
+	// Apply pulling force to the target if grappling
 	if(Character->bIsGrappling) {
 		float PullForce;
+		// Adjust pulling force based on whether the target is an enemy or a physics object
 		if (TargetComponent && TargetComponent->IsSimulatingPhysics())
 			PullForce = 70000.f / TargetComponent->GetMass();
 		else if (Cast<AEnemy>(TargetActor))

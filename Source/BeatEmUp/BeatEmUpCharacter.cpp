@@ -78,21 +78,24 @@ void ABeatEmUpCharacter::Tick(float DeltaTime) {
 		FVector Direction = (GrapplingHookTarget - GetActorLocation()).GetSafeNormal();
         GrapplingForce += Direction * GrapplingHookAcceleration * DeltaTime;
         GrapplingForce = GrapplingForce.GetClampedToMaxSize(MaxGrapplingSpeed);
-    
+
+		// Update the character's velocity with the grappling force
         GetCharacterMovement()->Velocity = GrapplingForce;
-    
+
+		// If the character is within 100 units of the target, stop grappling
         if(FVector::Dist(GetActorLocation(), GrapplingHookTarget) < 100.f) {
         	UE_LOG(LogTemp, Warning, TEXT("Stopping Grappling Hook! Character is close enough!"));
         	StopGrapplingHook();
         }
 	}
 
+	// Check if a portal creation process is ongoing and cancel it if the character moves too far away
 	if (ActivePortalSystem && !ActivePortalSystem->ExitPortal && FVector::Dist(GetActorLocation(), ActivePortalSystem->EntryPortal->GetActorLocation()) > PortalRange) {
 		EndPortalCreation();
 		UE_LOG(LogTemp, Warning, TEXT("Character is too far from the portal!, the distance is %s"), *FString::SanitizeFloat(FVector::Dist(GetActorLocation(), ActivePortalSystem->EntryPortal->GetActorLocation())));
 	}
 		
-
+	// If the character is currently in a portal, process teleportation mechanics
 	if (bIsInPortal && ActivePortalSystem)
 		TeleportTick();
 }
@@ -118,6 +121,7 @@ void ABeatEmUpCharacter::BeginPlay()
 //////////////////////////////////////////////////////////////////////////
 // Punch
 void ABeatEmUpCharacter::Punch() {
+	// Early exit if punch is not ready
 	if(!bPunchReady) return;
 
 	bPunchReady = false;
@@ -200,6 +204,7 @@ void ABeatEmUpCharacter::DealDamage(float Damage) {
 //////////////////////////////////////////////////////////////////////////
 // Grapple
 void ABeatEmUpCharacter::LaunchGrapplingHook() {
+	// Check if the grappling hook is already active; if so, deactivate it
 	if(bIsGrapplingHookActive) {
 		UE_LOG(LogTemp, Warning, TEXT("Already Activated!"));
 		StopGrapplingHook();
@@ -215,6 +220,7 @@ void ABeatEmUpCharacter::LaunchGrapplingHook() {
 	bool bHit = GetWorld()->LineTraceSingleByChannel(HitData, Start, End, ECC_Visibility, TraceParams);
 
 	Start = GetActorLocation();
+	// Optionally draw a debug line to visualize the grappling hook path
 	if(bEnableDebug)
 		DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 5.0f, 0, 1.0f);
 
@@ -227,6 +233,7 @@ void ABeatEmUpCharacter::LaunchGrapplingHook() {
 	FVector Direction = (HitData.ImpactPoint - Start).GetSafeNormal();
 	FRotator LaunchRotation = Direction.Rotation();
 
+	// Create the grappling hook at the location of the character, pointing towards the hit point
 	if (AGrapplingHook* GrapplingHook = GetWorld()->SpawnActor<AGrapplingHook>(GrapplingHookClass, Start, LaunchRotation)) {
 		GrapplingHook->Launch(HitData.ImpactPoint, this);
 		LaunchedGrapplingHook = GrapplingHook;
@@ -235,12 +242,13 @@ void ABeatEmUpCharacter::LaunchGrapplingHook() {
 }
 
 void ABeatEmUpCharacter::StartGrapplingHook(const FVector& TargetLocation) {
-	if(bIsGrappling) return;
+	if(bIsGrappling) return;  // Exit if grappling is already in progress
 
 	GrapplingHookTarget = TargetLocation;
 	GrapplingForce = GetCharacterMovement()->Velocity;
 	bIsGrappling = true;
 
+	// Set character movement mode to flying to enable aerial maneuvers
 	GetCharacterMovement()->SetMovementMode(MOVE_Flying);
 }
 
@@ -252,11 +260,14 @@ void ABeatEmUpCharacter::StopGrapplingHook() {
 	LaunchedGrapplingHook->Destroy();
 	LaunchedGrapplingHook = nullptr;
 
+	// Reset character movement mode to falling after grappling is stopped
 	GetCharacterMovement()->SetMovementMode(MOVE_Falling);
 }
 
 //////////////////////////////////////////////////////////////////////////
 // Grenade
+
+// Sets the character to have a grenade available for throwing
 void ABeatEmUpCharacter::PickUpGrenade() {
 	bHasGrenade = true;
 }
@@ -268,9 +279,9 @@ void ABeatEmUpCharacter::ThrowGrenade() {
 	FVector ThrowDirection = GetFollowCamera()->GetForwardVector() + FVector::UpVector;
 	ThrowDirection.Normalize();
 	
-	ThrowDirection *= ThrowForce;
+	ThrowDirection *= ThrowForce;  // Apply force to the throw direction
 	if(AGrenade* Grenade = GetWorld()->SpawnActor<AGrenade>(GrenadeClass, GetActorLocation() + FVector(0, 0, 50), FRotator::ZeroRotator))
-		Grenade->Initialize(ThrowDirection, bEnableDebug);
+		Grenade->Initialize(ThrowDirection, bEnableDebug);  // Initialize the grenade's trajectory
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -309,6 +320,7 @@ void ABeatEmUpCharacter::EnterPortal(const APortal* Portal) {
 	bIsInPortal = true;
 	
 	TeleportTrailComponent->ActivateSystem();
+	// Reverse the teleport direction if entering the exit portal
 	if (Portal == Cast<APortal>(ActivePortalSystem->ExitPortal)) {
 		CurrentSnapshotIndex = ActivePortalSystem->TransformSnapshots.Num() - 1;
 		CurrentSpeedMultiplier = -SpeedMultiplier;
@@ -345,6 +357,7 @@ void ABeatEmUpCharacter::TeleportTick() {
 
 	FTransform Snapshot = ActivePortalSystem->TransformSnapshots[CurrentSnapshotIndex].Transform;
 
+	// Adjust rotation if moving backwards through the teleport
 	if (CurrentSpeedMultiplier < 0) {
 		FRotator NewRotation = Snapshot.GetRotation().Rotator();
 		NewRotation.Yaw += 180.0f;

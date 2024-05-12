@@ -13,7 +13,7 @@ void UEnemyStatusWidget::UpdateValues() const {
 
 void UEnemyStatusWidget::ShowWarningIcon() const {
 	if(WarningIcon) WarningIcon->SetVisibility(ESlateVisibility::Visible);
-	HideInvestigateIcon();
+	HideInvestigateIcon();  // Hide investigate icon if warning icon is shown
 }
 void UEnemyStatusWidget::HideWarningIcon() const {
 	if(WarningIcon) WarningIcon->SetVisibility(ESlateVisibility::Hidden);
@@ -21,11 +21,9 @@ void UEnemyStatusWidget::HideWarningIcon() const {
 
 void UEnemyStatusWidget::ShowInvestigateIcon() const {
 	if(InvestigateIcon) InvestigateIcon->SetVisibility(ESlateVisibility::Visible);
-	HideWarningIcon();
+	HideWarningIcon();  // Hide warning icon if investigate icon is shown
 }
 
 void UEnemyStatusWidget::HideInvestigateIcon() const {
 	if(InvestigateIcon) InvestigateIcon->SetVisibility(ESlateVisibility::Hidden);
 }
-
-

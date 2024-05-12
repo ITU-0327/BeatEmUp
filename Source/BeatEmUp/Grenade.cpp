@@ -19,6 +19,8 @@ AGrenade::AGrenade() {
 // Called when the game starts or when spawned
 void AGrenade::BeginPlay() {
 	Super::BeginPlay();
+	
+	// Set a timer to trigger the explosion after a predefined delay
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle_Explosion, this, &AGrenade::Explode, TimeToExplode, false);
 }
 
@@ -28,10 +30,10 @@ void AGrenade::Tick(float DeltaTime) {
 }
 
 void AGrenade::Initialize(const FVector& ThrowDirection, const bool bDebug) {
-	Mesh->SetSimulatePhysics(true);
+	Mesh->SetSimulatePhysics(true);  // Enable physics simulation for the grenade
 	
-	Mesh->AddImpulse(ThrowDirection);
-	bEnableDebug = bDebug;
+	Mesh->AddImpulse(ThrowDirection);  // Apply an initial force in the specified direction
+	bEnableDebug = bDebug; // Store the debug state
 }
 
 void AGrenade::Explode() {
@@ -39,7 +41,7 @@ void AGrenade::Explode() {
 	UGameplayStatics::PlaySoundAtLocation(this, ExplosionSound, GetActorLocation());
 
 	TArray<AActor*> IgnoredActors;
-	IgnoredActors.Add(this);
+	IgnoredActors.Add(this);  // Ensure the grenade does not damage itself
 	UGameplayStatics::ApplyRadialDamage(GetWorld(), 100.0f, GetActorLocation(), ExplosionRadius, nullptr, IgnoredActors, this, GetInstigatorController(), true);
 
 	TArray<FHitResult> HitResults;
