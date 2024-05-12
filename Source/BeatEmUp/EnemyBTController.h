@@ -26,17 +26,17 @@ class BEATEMUP_API AEnemyBTController : public AAIController
 	virtual FRotator GetControlRotation() const override;
 	
 public:
-	void GenerateNewRandomLocation();
+	void GenerateNewRandomLocation() const;
 
 	UFUNCTION()
 		void OnSensesUpdated(AActor* UpdatedActor, FAIStimulus Stimulus);
 
 	UPROPERTY(EditAnywhere, Category="Enemy Settings")
-		float SightRadius = 500;
+		float SightRadius = 600;
 	UPROPERTY(EditAnywhere, Category="Enemy Settings")
-		float SightAge = 3.5;
+		float SightAge = 5;
 	UPROPERTY(EditAnywhere)
-		float LoseSightRadius = SightRadius + 50;
+		float LoseSightRadius = SightRadius + 200;
 	UPROPERTY(EditAnywhere, Category="Enemy Settings")
 		float FieldOfView = 45;
 	UPROPERTY(EditAnywhere, Category="Enemy Settings")
@@ -62,7 +62,7 @@ public:
 	// Alert
 	UPROPERTY(EditAnywhere, Category="Enemy Settings")
 		float AlertRadius = 1000;
-	void AlertNearbyEnemies();
+	void AlertNearbyEnemies() const;
 	void OnAlerted(APawn* AlertedPlayer);
 
 	// Debug

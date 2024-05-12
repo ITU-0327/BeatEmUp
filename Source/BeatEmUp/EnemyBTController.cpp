@@ -55,7 +55,7 @@ FRotator AEnemyBTController::GetControlRotation() const {
 	return Super::GetControlRotation();
 }
 
-void AEnemyBTController::GenerateNewRandomLocation() {
+void AEnemyBTController::GenerateNewRandomLocation() const {
 	if(!NavSystem) return;
 	
 	FNavLocation ReturnLocation;
@@ -94,7 +94,7 @@ void AEnemyBTController::Shoot() {
 	BlackboardComponent->SetValueAsBool("HasAmmo", Ammo > 0);
 }
 
-void AEnemyBTController::AlertNearbyEnemies() {
+void AEnemyBTController::AlertNearbyEnemies() const {
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(GetPawn());
 
@@ -109,7 +109,7 @@ void AEnemyBTController::AlertNearbyEnemies() {
 	);
 
 	for(FOverlapResult Result : OverlapResults) {
-		APawn* EnemyPawn = Cast<APawn>(Result.GetActor());
+		const APawn* EnemyPawn = Cast<APawn>(Result.GetActor());
 		if(!EnemyPawn) continue;
 		if(EnemyPawn == GetPawn()) continue;
 		
@@ -131,10 +131,10 @@ void AEnemyBTController::DrawDebugVision() const {
 	if(!bDrawDebug) return;
 	if (!GetPawn()) return;
 
-	FVector Start = GetPawn()->GetActorLocation();
-	float HalfAngleRadians = FMath::DegreesToRadians(FieldOfView / 2);
+	const FVector Start = GetPawn()->GetActorLocation();
+	const float HalfAngleRadians = FMath::DegreesToRadians(FieldOfView / 2);
 
-	FVector Forward = GetPawn()->GetActorForwardVector();
+	const FVector Forward = GetPawn()->GetActorForwardVector();
 
 	DrawDebugCone(
 		GetWorld(),
