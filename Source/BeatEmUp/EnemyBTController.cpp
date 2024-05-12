@@ -4,6 +4,7 @@
 #include "EnemyBTController.h"
 #include "DrawDebugHelpers.h"
 #include "Enemy.h"
+#include "Kismet/GameplayStatics.h"
 
 AEnemyBTController::AEnemyBTController() {
 	PrimaryActorTick.bCanEverTick = true;
@@ -25,6 +26,9 @@ AEnemyBTController::AEnemyBTController() {
 
 void AEnemyBTController::BeginPlay() {
 	Super::BeginPlay();
+
+	if(const ABeatEmUpCharacter* PlayerCharacter = Cast<ABeatEmUpCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)))
+		bDrawDebug = PlayerCharacter->bEnableDebug;
 
 	NavSystem = Cast<UNavigationSystemV1>(GetWorld()->GetNavigationSystem());
 
