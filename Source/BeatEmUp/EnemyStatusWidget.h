@@ -22,6 +22,8 @@ public:
 	UPROPERTY(meta=(BindWidget))
 		UImage* WarningIcon;
 	UPROPERTY(meta=(BindWidget))
+		UImage* InvestigateIcon;
+	UPROPERTY(meta=(BindWidget))
 		UProgressBar* HealthBar;
 
 	UPROPERTY()
@@ -30,4 +32,6 @@ public:
 	void UpdateValues() const;
 	void ShowWarningIcon() const;
 	void HideWarningIcon() const;
+	void ShowInvestigateIcon() const;
+	void HideInvestigateIcon() const;
 };

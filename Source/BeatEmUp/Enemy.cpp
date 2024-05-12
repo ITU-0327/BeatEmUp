@@ -41,6 +41,7 @@ void AEnemy::BeginPlay() {
 		HealthBar->Enemy = this;
 		HealthBar->UpdateValues();
 		HealthBar->HideWarningIcon();
+		HealthBar->HideInvestigateIcon();
 	}
 }
 

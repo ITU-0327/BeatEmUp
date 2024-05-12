@@ -12,12 +12,20 @@ void UEnemyStatusWidget::UpdateValues() const {
 }
 
 void UEnemyStatusWidget::ShowWarningIcon() const {
-	if (WarningIcon) {
-		WarningIcon->SetVisibility(ESlateVisibility::Visible);
-	}
+	if(WarningIcon) WarningIcon->SetVisibility(ESlateVisibility::Visible);
+	HideInvestigateIcon();
 }
 void UEnemyStatusWidget::HideWarningIcon() const {
-	if (WarningIcon) {
-		WarningIcon->SetVisibility(ESlateVisibility::Hidden);
-	}
+	if(WarningIcon) WarningIcon->SetVisibility(ESlateVisibility::Hidden);
 }
+
+void UEnemyStatusWidget::ShowInvestigateIcon() const {
+	if(InvestigateIcon) InvestigateIcon->SetVisibility(ESlateVisibility::Visible);
+	HideWarningIcon();
+}
+
+void UEnemyStatusWidget::HideInvestigateIcon() const {
+	if(InvestigateIcon) InvestigateIcon->SetVisibility(ESlateVisibility::Hidden);
+}
+
+

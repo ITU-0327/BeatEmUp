@@ -36,7 +36,7 @@ public:
 	UPROPERTY(EditAnywhere, Category="Enemy Settings")
 		float SightAge = 5;
 	UPROPERTY(EditAnywhere)
-		float LoseSightRadius = SightRadius + 200;
+		float LoseSightRadius = SightRadius + 300;
 	UPROPERTY(EditAnywhere, Category="Enemy Settings")
 		float FieldOfView = 45;
 	UPROPERTY(EditAnywhere, Category="Enemy Settings")
@@ -63,7 +63,11 @@ public:
 	UPROPERTY(EditAnywhere, Category="Enemy Settings")
 		float AlertRadius = 1000;
 	void AlertNearbyEnemies() const;
-	void OnAlerted(APawn* AlertedPlayer);
+	void OnAlerted(const FVector& LastSeenLocation) const;
+	void ShowWarningIcon() const;
+	void HideWarningIcon() const;
+	void ShowInvestigatingIcon() const;
+	void HideInvestigatingIcon() const;
 
 	// Debug
 	UPROPERTY(EditAnywhere, Category="Enemy Settings")

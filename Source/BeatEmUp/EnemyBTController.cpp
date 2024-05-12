@@ -71,23 +71,25 @@ void AEnemyBTController::OnSensesUpdated(AActor* UpdatedActor, FAIStimulus Stimu
 	if(Stimulus.WasSuccessfullySensed()) {
 		TargetPlayer = SensedPawn;
 		BlackboardComponent->SetValueAsBool("ChasePlayer", true);
+		BlackboardComponent->SetValueAsBool("CanSeePlayer", true);
 		BlackboardComponent->SetValueAsVector("PlayerLocation", TargetPlayer->GetActorLocation());
 
-		if(const AEnemy* Enemy = Cast<AEnemy>(GetPawn()))
-			Enemy->HealthBar->ShowWarningIcon();
+		ShowWarningIcon();
 
 		AlertNearbyEnemies();
 	}
 	else {
 		TargetPlayer = nullptr;
+		BlackboardComponent->SetValueAsBool("CanSeePlayer", false);
 		BlackboardComponent->SetValueAsBool("ChasePlayer", false);
 
-		if(const AEnemy* Enemy = Cast<AEnemy>(GetPawn()))
-			Enemy->HealthBar->HideWarningIcon();
+		HideWarningIcon();
 	}
 }
 
 void AEnemyBTController::Shoot() {
+	if(!TargetPlayer) return;
+	
 	const FVector ShootDirection = TargetPlayer->GetActorLocation() - GetPawn()->GetActorLocation();
 	Cast<AEnemy>(GetPawn())->Shoot(ShootDirection);
 	Ammo--;
@@ -95,6 +97,7 @@ void AEnemyBTController::Shoot() {
 }
 
 void AEnemyBTController::AlertNearbyEnemies() const {
+	FVector LastSeenLocation = TargetPlayer->GetActorLocation();
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(GetPawn());
 
@@ -114,17 +117,37 @@ void AEnemyBTController::AlertNearbyEnemies() const {
 		if(EnemyPawn == GetPawn()) continue;
 		
 		if (AEnemyBTController* EnemyController = Cast<AEnemyBTController>(EnemyPawn->GetController()))
-			EnemyController->OnAlerted(TargetPlayer);
+			EnemyController->OnAlerted(LastSeenLocation);
 	}
 }
 
-void AEnemyBTController::OnAlerted(APawn* AlertedPlayer) {
-	TargetPlayer = AlertedPlayer;
+void AEnemyBTController::OnAlerted(const FVector& LastSeenLocation) const {
+	if(BlackboardComponent->GetValueAsBool("CanSeePlayer")) return;
+	
 	BlackboardComponent->SetValueAsBool("ChasePlayer", true);
-	BlackboardComponent->SetValueAsVector("PlayerLocation", TargetPlayer->GetActorLocation());
+	BlackboardComponent->SetValueAsVector("LastSeenLocation", LastSeenLocation);
 
+	ShowInvestigatingIcon();
+}
+
+void AEnemyBTController::ShowWarningIcon() const {
 	if(const AEnemy* Enemy = Cast<AEnemy>(GetPawn()))
 		Enemy->HealthBar->ShowWarningIcon();
+}
+
+void AEnemyBTController::HideWarningIcon() const {
+	if(const AEnemy* Enemy = Cast<AEnemy>(GetPawn()))
+		Enemy->HealthBar->HideWarningIcon();
+}
+
+void AEnemyBTController::ShowInvestigatingIcon() const {
+	if(const AEnemy* Enemy = Cast<AEnemy>(GetPawn()))
+		Enemy->HealthBar->ShowInvestigateIcon();
+}
+
+void AEnemyBTController::HideInvestigatingIcon() const {
+	if(const AEnemy* Enemy = Cast<AEnemy>(GetPawn()))
+		Enemy->HealthBar->HideInvestigateIcon();
 }
 
 void AEnemyBTController::DrawDebugVision() const {
