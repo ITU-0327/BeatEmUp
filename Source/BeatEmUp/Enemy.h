@@ -51,6 +51,10 @@ public:
 		UWidgetComponent* HealthBarWidgetComponent;
 	void UpdateWidgetRotation() const;
 
+	// Progression
+	UPROPERTY(EditAnywhere, Category="Enemy Settings")
+		int ExpAmount = 20;
+
 	// Range Attack
 	UPROPERTY(EditAnywhere, Category="Enemy Settings")
 		TSubclassOf<ABullet> BulletClass;

@@ -12,6 +12,8 @@ void UInGameUI::UpdateValues() const {
 	if(GetWorld()->GetTimerManager().TimerExists(Player->PunchTimerHandle))
 		PunchTimePercentage = GetWorld()->GetTimerManager().GetTimerRemaining(Player->PunchTimerHandle) / Player->PunchCooldown;
 	PunchCooldown->SetPercent(1 - PunchTimePercentage);
+	MaxHealthText->SetText(FText::FromString(FString::SanitizeFloat(Player->MaxHealth)));
+	ExpBar->SetPercent((float)Player->CurrentExp / Player->ExpToLevel);
 }
 
 void UInGameUI::UpdatePlayerIndicator(float Rotation) const{

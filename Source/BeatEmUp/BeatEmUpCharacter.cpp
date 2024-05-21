@@ -193,6 +193,18 @@ void ABeatEmUpCharacter::Use() {
 		UE_LOG(LogTemp, Warning, TEXT("Actor not interactable!"));
 }
 
+void ABeatEmUpCharacter::AddExp(int ExpToAdd) {
+	CurrentExp += ExpToAdd;
+	while(CurrentExp > ExpToLevel) {
+		CurrentExp -= ExpToLevel;
+		ExpToLevel *= IncreaseMultiplier;
+		PunchDamage *= IncreaseMultiplier;
+		MaxHealth *= IncreaseMultiplier;
+		CurrentHealth = MaxHealth;
+	}
+	InGameUI->UpdateValues();
+}
+
 void ABeatEmUpCharacter::DealDamage(float Damage) {
 	CurrentHealth = FMath::Clamp(CurrentHealth - Damage, 0.f, MaxHealth);
 

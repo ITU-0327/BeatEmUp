@@ -98,6 +98,8 @@ void AEnemy::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveC
 
 void AEnemy::Ragdoll() {
 	Cast<AEnemyBTController>(GetController())->BrainComponent->PauseLogic("Rag dolling!");
+
+	HealthBar->SetVisibility(ESlateVisibility::Hidden);
 	
 	GetMesh()->SetCollisionProfileName("Ragdoll");
 	GetMesh()->SetSimulatePhysics(true);
@@ -108,10 +110,14 @@ void AEnemy::Ragdoll() {
 void AEnemy::StopRagdoll() {
 	Cast<AEnemyBTController>(GetController())->BrainComponent->ResumeLogic("Moving Again!");
 	
+	
 	if(CurrentHealth <= 0) {
+		Player->AddExp(ExpAmount);
 		Destroy();
 		return;
 	}
+	
+	HealthBar->SetVisibility(ESlateVisibility::Visible);
 
 	GetMesh()->SetSimulatePhysics(false);
 	GetMesh()->SetCollisionProfileName("CharacterMesh");

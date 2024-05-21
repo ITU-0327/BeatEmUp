@@ -28,6 +28,9 @@ public:
 	UPROPERTY(meta=(BindWidget))
 		UImage* PlayerIndicator;
 
+	UPROPERTY(meta=(BindWidget))
+		UProgressBar* ExpBar;
+
 	UPROPERTY()
 		ABeatEmUpCharacter* Player;
 

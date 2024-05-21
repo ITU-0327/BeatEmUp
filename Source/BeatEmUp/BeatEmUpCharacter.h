@@ -192,6 +192,16 @@ public:
 	void SetPortalCooldown();
 	void ResetPortal();
 	void TeleportTick();
+
+	// Progression
+	UPROPERTY(EditAnywhere, Category="Progression")
+		int CurrentExp = 0;
+	UPROPERTY(EditAnywhere, Category="Progression")
+		int ExpToLevel = 100;
+	UPROPERTY(EditAnywhere, Category="Progression")
+		float IncreaseMultiplier = 1.5;
+
+	void AddExp(int ExpToAdd);
 		
 	// Helper Functions
 	void DealDamage(float Damage);
