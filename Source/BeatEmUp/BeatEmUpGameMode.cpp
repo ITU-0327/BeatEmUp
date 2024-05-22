@@ -3,6 +3,9 @@
 #include "BeatEmUpGameMode.h"
 #include "BeatEmUpCharacter.h"
 #include "BeatEmUpGameInstance.h"
+#include "BrainComponent.h"
+#include "EnemyBTController.h"
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
@@ -50,6 +53,10 @@ void ABeatEmUpGameMode::Load(UBeatEmUpSaveGame* LoadedGame) {
 			SpawnedEnemy->GetMesh()->SetWorldLocation(LoadedGame->EnemyMeshLocations[i], false, nullptr, ETeleportType::TeleportPhysics);
 			SpawnedEnemy->GetMesh()->SetAllPhysicsLinearVelocity(LoadedGame->EnemyMeshVelocities[i], true);
 		}
+		else {
+			SpawnedEnemy->Ragdoll();
+			SpawnedEnemy->StopRagdoll();
+		}
 	}
 }
 
@@ -87,6 +94,6 @@ void ABeatEmUpGameMode::PostBeginPlay() {
 	if(!GameInstance) return;
 	if(!GameInstance->bLoadSave) return;
 
-	if(UBeatEmUpSaveGame* LoadedGame = Cast<UBeatEmUpSaveGame>(UGameplayStatics::LoadGameFromSlot("SaveSlot", 0)))
+	if(UBeatEmUpSaveGame* LoadedGame = Cast<UBeatEmUpSaveGame>(UGameplayStatics::LoadGameFromSlot("TestSave", 0)))
 		Load(LoadedGame);
 }

@@ -29,7 +29,7 @@ void UPauseMenu::OnSaveClicked() {
 	if(!BeatEmUpGameMode) return;
 
 	BeatEmUpGameMode->Save(SaveGameInstance);
-	UGameplayStatics::SaveGameToSlot(SaveGameInstance, "SaveSlot", 0);
+	UGameplayStatics::SaveGameToSlot(SaveGameInstance, "TestSave", 0);
 }
 
 void UPauseMenu::OnQuitClicked() {

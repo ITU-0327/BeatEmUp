@@ -13,5 +13,11 @@ UCLASS()
 class BEATEMUP_API ULoadButton : public UButton
 {
 	GENERATED_BODY()
-	
+
+public:
+	ULoadButton();
+	UFUNCTION()
+		void OnClick();
+	UPROPERTY(EditAnywhere)
+		FName MapToOpen;
 };
