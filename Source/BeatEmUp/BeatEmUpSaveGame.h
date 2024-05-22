@@ -14,6 +14,7 @@ class BEATEMUP_API UBeatEmUpSaveGame : public USaveGame
 {
 	GENERATED_BODY()
 
+public:
 	UPROPERTY()
 		FString SaveSlotName;
 	UPROPERTY()
@@ -49,5 +50,5 @@ class BEATEMUP_API UBeatEmUpSaveGame : public USaveGame
 	UPROPERTY()
 		TArray<FVector> EnemyMeshLocations;
 	UPROPERTY()
-		TArray<FRotator> EnemyMeshVelocities;
+		TArray<FVector> EnemyMeshVelocities;
 };

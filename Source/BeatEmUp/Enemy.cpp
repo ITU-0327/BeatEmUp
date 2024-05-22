@@ -110,7 +110,6 @@ void AEnemy::Ragdoll() {
 void AEnemy::StopRagdoll() {
 	Cast<AEnemyBTController>(GetController())->BrainComponent->ResumeLogic("Moving Again!");
 	
-	
 	if(CurrentHealth <= 0) {
 		Player->AddExp(ExpAmount);
 		Destroy();
@@ -125,6 +124,5 @@ void AEnemy::StopRagdoll() {
 	GetMesh()->AttachToComponent(GetCapsuleComponent(), FAttachmentTransformRules::SnapToTargetIncludingScale);
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0, 0, -90), FRotator(0, -90, 0));
 	GetCapsuleComponent()->SetCollisionProfileName("Pawn");
+	GetCharacterMovement()->GravityScale = 1;
 }
-
-
