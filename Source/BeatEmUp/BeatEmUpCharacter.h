@@ -70,6 +70,10 @@ class ABeatEmUpCharacter : public ACharacter
 	/** Portal Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* PortalAction;
+
+	/** Pause Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* PauseAction;
 	
 public:
 	ABeatEmUpCharacter();
@@ -202,6 +206,12 @@ public:
 		float IncreaseMultiplier = 1.5;
 
 	void AddExp(int ExpToAdd);
+
+	// Pause Menu
+	UPROPERTY(EditAnywhere, Category="Pause Menu")
+		TSubclassOf<UUserWidget> PauseMenuClass;
+	UFUNCTION()
+		void PauseGame();
 		
 	// Helper Functions
 	void DealDamage(float Damage);

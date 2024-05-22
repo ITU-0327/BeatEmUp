@@ -16,6 +16,8 @@
 #include "Interactable.h"
 #include "DrawDebugHelpers.h"
 #include "Grenade.h"
+#include "PauseMenu.h"
+#include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -203,6 +205,17 @@ void ABeatEmUpCharacter::AddExp(int ExpToAdd) {
 		CurrentHealth = MaxHealth;
 	}
 	InGameUI->UpdateValues();
+}
+
+void ABeatEmUpCharacter::PauseGame() {
+	if(UGameplayStatics::IsGamePaused(GetWorld())) return;
+
+	UGameplayStatics::SetGamePaused(GetWorld(), true);
+	if(UPauseMenu* PauseMenu = Cast<UPauseMenu>(CreateWidget(GetGameInstance(), PauseMenuClass))) {
+		GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(true);
+        GetWorld()->GetFirstPlayerController()->SetInputMode(FInputModeUIOnly());
+        PauseMenu->AddToViewport();
+	}
 }
 
 void ABeatEmUpCharacter::DealDamage(float Damage) {
@@ -412,6 +425,9 @@ void ABeatEmUpCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 		// Creating Portal
 		EnhancedInputComponent->BindAction(PortalAction, ETriggerEvent::Started, this, &ABeatEmUpCharacter::StartPortalCreation);
+
+		// Pausing the game
+		EnhancedInputComponent->BindAction(PauseAction, ETriggerEvent::Started, this, &ABeatEmUpCharacter::PauseGame);
 	}
 	else {
 		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
