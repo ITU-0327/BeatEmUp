@@ -17,6 +17,7 @@
 #include "DrawDebugHelpers.h"
 #include "Grenade.h"
 #include "PauseMenu.h"
+#include "NiagaraComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
 
@@ -128,6 +129,11 @@ void ABeatEmUpCharacter::Punch() {
 
 	bPunchReady = false;
 	GetWorld()->GetTimerManager().SetTimer(PunchTimerHandle, this, &ABeatEmUpCharacter::ResetPunch, PunchCooldown, false);
+
+	if(PunchEffectClass) {
+		UNiagaraComponent* SpawnEffect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), PunchEffectClass, GetActorLocation(), GetActorRotation());
+		SpawnEffect->SetColorParameter(FName("User.SpawnColour"), FLinearColor::MakeRandomColor());
+	}
 
 	TArray<FHitResult> HitResults;
 	const FVector Start = GetActorLocation();

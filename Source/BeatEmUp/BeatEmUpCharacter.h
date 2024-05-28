@@ -7,6 +7,7 @@
 #include "Grenade.h"
 #include "InGameUI.h"
 #include "PortalSystem.h"
+#include "NiagaraFunctionLibrary.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "Windows/AllowWindowsPlatformTypes.h"
@@ -212,6 +213,10 @@ public:
 		TSubclassOf<UUserWidget> PauseMenuClass;
 	UFUNCTION()
 		void PauseGame();
+
+	// Punch Effects
+	UPROPERTY(EditAnywhere, Category="Punch Effects")
+		UNiagaraSystem* PunchEffectClass;
 		
 	// Helper Functions
 	void DealDamage(float Damage);

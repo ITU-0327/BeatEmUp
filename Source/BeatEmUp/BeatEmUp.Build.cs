@@ -9,6 +9,6 @@ public class BeatEmUp : ModuleRules
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore",
-			"EnhancedInput", "CableComponent", "UMG", "NavigationSystem", "AIModule", "GameplayTasks" });
+			"EnhancedInput", "CableComponent", "UMG", "NavigationSystem", "AIModule", "GameplayTasks", "Niagara" });
 	}
 }
