@@ -59,6 +59,10 @@ public:
 	UPROPERTY(EditAnywhere, Category="Enemy Settings")
 		TSubclassOf<ABullet> BulletClass;
 	void Shoot(FVector Direction);
+
+	// Death Effect
+	UPROPERTY(EditAnywhere, Category="Enemy Settings")
+		UNiagaraSystem* DeathParticleClass;
 	
 	
 	// Called every frame
