@@ -117,6 +117,10 @@ void AEnemy::StopRagdoll() {
 			UNiagaraComponent* SpawnedEffect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), DeathParticleClass, GetMesh()->GetComponentLocation());
 			SpawnedEffect->SetColorParameter(FName("User.SpawnColour"), FLinearColor::MakeRandomColor());
 		}
+		if(HealthPackClass) {
+			const FVector SpawnLocation = GetMesh()->GetComponentLocation() + FVector(0, 0, 50);
+			GetWorld()->SpawnActor(HealthPackClass, &SpawnLocation);
+		}
 		Destroy();
 		return;
 	}

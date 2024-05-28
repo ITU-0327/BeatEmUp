@@ -7,6 +7,7 @@
 #include "Bullet.h"
 #include "DamageTextUI.h"
 #include "EnemyStatusWidget.h"
+#include "HealthPack.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/Character.h"
 #include "Enemy.generated.h"
@@ -63,6 +64,8 @@ public:
 	// Death Effect
 	UPROPERTY(EditAnywhere, Category="Enemy Settings")
 		UNiagaraSystem* DeathParticleClass;
+	UPROPERTY(EditAnywhere, Category="Enemy Settings")
+		TSubclassOf<AHealthPack> HealthPackClass;
 	
 	
 	// Called every frame
