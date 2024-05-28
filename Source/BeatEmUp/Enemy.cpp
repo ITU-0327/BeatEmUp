@@ -44,6 +44,12 @@ void AEnemy::BeginPlay() {
 		HealthBar->HideWarningIcon();
 		HealthBar->HideInvestigateIcon();
 	}
+
+	if(DynamicSpotlightClass) {
+		const FVector SpawnLocation = GetActorLocation();
+		Spotlight = Cast<ADynamicSpotlight>(GetWorld()->SpawnActor(DynamicSpotlightClass, &SpawnLocation));
+		Spotlight->TargetActor = this;
+	}
 }
 
 void AEnemy::UpdateWidgetRotation() const {
@@ -121,6 +127,7 @@ void AEnemy::StopRagdoll() {
 			const FVector SpawnLocation = GetMesh()->GetComponentLocation() + FVector(0, 0, 50);
 			GetWorld()->SpawnActor(HealthPackClass, &SpawnLocation);
 		}
+		Spotlight->Destroy();
 		Destroy();
 		return;
 	}

@@ -6,6 +6,7 @@
 #include "BeatEmUpCharacter.h"
 #include "Bullet.h"
 #include "DamageTextUI.h"
+#include "DynamicSpotlight.h"
 #include "EnemyStatusWidget.h"
 #include "HealthPack.h"
 #include "Components/WidgetComponent.h"
@@ -66,6 +67,12 @@ public:
 		UNiagaraSystem* DeathParticleClass;
 	UPROPERTY(EditAnywhere, Category="Enemy Settings")
 		TSubclassOf<AHealthPack> HealthPackClass;
+
+	// Spotlight Effect
+	UPROPERTY(EditAnywhere, Category="Enemy Settings")
+		TSubclassOf<ADynamicSpotlight> DynamicSpotlightClass;
+	UPROPERTY()
+		ADynamicSpotlight* Spotlight;
 	
 	
 	// Called every frame
