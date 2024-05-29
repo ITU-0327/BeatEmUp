@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "TransformSnapshot.h"
 #include "GameFramework/Actor.h"
 #include "Portal.generated.h"
 

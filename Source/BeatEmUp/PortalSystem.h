@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Portal.h"
-#include "TransformSnapshot.h"
 #include "GameFramework/Actor.h"
 #include "PortalSystem.generated.h"
 
@@ -37,7 +36,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 		AActor* ExitPortal = nullptr;
 
-	TArray<FTransformSnapshot> TransformSnapshots;
+	TArray<FTransform> TransformSnapshots;
 
 	void CreateEntryPortal(const FVector& EntryLocation, const FRotator& EntryRotation);
 	void CreateExitPortal(const FVector& ExitLocation, const FRotator& ExitRotation);

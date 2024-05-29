@@ -57,22 +57,32 @@ void ABeatEmUpGameMode::Load(UBeatEmUpSaveGame* LoadedGame) {
 	}
 
 	// Grappling hook data
-	AGrapplingHook* GrapplingHook = PlayerCharacter->LaunchedGrapplingHook;
-	if(!GrapplingHook) {
-		GrapplingHook = GetWorld()->SpawnActor<AGrapplingHook>(PlayerCharacter->GrapplingHookClass, LoadedGame->GrapplingHookLocation, LoadedGame->GrapplingHookRotation);
-		PlayerCharacter->LaunchedGrapplingHook = GrapplingHook;
-		GrapplingHook->Initiator = PlayerCharacter;
+	if(LoadedGame->GrapplingHookLocation != FVector::ZeroVector) {
+		AGrapplingHook* GrapplingHook = GetWorld()->SpawnActor<AGrapplingHook>(PlayerCharacter->GrapplingHookClass, LoadedGame->GrapplingHookLocation, LoadedGame->GrapplingHookRotation);
+        PlayerCharacter->LaunchedGrapplingHook = GrapplingHook;
+        GrapplingHook->Initiator = PlayerCharacter;
+        
+        GrapplingHook->TargetLocation = LoadedGame->GrapplingHookTargetLocation;
+        if(LoadedGame->bIsGrapplingHookActive)
+        	PlayerCharacter->StartGrapplingHook(LoadedGame->GrapplingHookTargetLocation);
+    
+        GrapplingHook->TargetActor = LoadedGame->GrapplingHookTargetActor;
+        GrapplingHook->TargetComponent = LoadedGame->GrapplingHookTargetComponent;
+    
+        if(PlayerCharacter->GetRootComponent() && GrapplingHook->CableComponent)
+        	GrapplingHook->CableComponent->SetAttachEndToComponent(PlayerCharacter->GetRootComponent());
 	}
 	
-	GrapplingHook->TargetLocation = LoadedGame->GrapplingHookTargetLocation;
-	if(LoadedGame->bIsGrapplingHookActive)
-		PlayerCharacter->StartGrapplingHook(LoadedGame->GrapplingHookTargetLocation);
 
-	GrapplingHook->TargetActor = LoadedGame->GrapplingHookTargetActor;
-	GrapplingHook->TargetComponent = LoadedGame->GrapplingHookTargetComponent;
-
-	if(PlayerCharacter->GetRootComponent() && GrapplingHook->CableComponent)
-		GrapplingHook->CableComponent->SetAttachEndToComponent(PlayerCharacter->GetRootComponent());
+	// Portal data
+	if(LoadedGame->EntryPortalLocation != FVector::ZeroVector) {
+		APortalSystem* PortalSystem = GetWorld()->SpawnActor<APortalSystem>(PlayerCharacter->PortalSystemClass);
+		PortalSystem->CreateEntryPortal(LoadedGame->EntryPortalLocation, LoadedGame->EntryPortalRotation);
+		if(LoadedGame->ExitPortalLocation != FVector::ZeroVector)
+			PortalSystem->CreateExitPortal(LoadedGame->ExitPortalLocation, LoadedGame->ExitPortalRotation);
+		PortalSystem->TransformSnapshots = LoadedGame->TransformSnapshots;
+		PlayerCharacter->ActivePortalSystem = PortalSystem;
+	}
 }
 
 void ABeatEmUpGameMode::Save(UBeatEmUpSaveGame* SaveGame) {
@@ -106,17 +116,29 @@ void ABeatEmUpGameMode::Save(UBeatEmUpSaveGame* SaveGame) {
 	}
 
 	// Grappling hook data
-	AGrapplingHook* GrapplingHook = PlayerCharacter->LaunchedGrapplingHook;
-	if(!GrapplingHook) return;
+	if(const AGrapplingHook* GrapplingHook = PlayerCharacter->LaunchedGrapplingHook) {
+		SaveGame->GrapplingHookLocation = GrapplingHook->GetActorLocation();
+        SaveGame->GrapplingHookRotation = GrapplingHook->GetActorRotation();
+        SaveGame->bIsGrapplingHookActive = GrapplingHook->bIsPulling || GrapplingHook->bRetracting;
+        SaveGame->GrapplingHookTargetLocation = GrapplingHook->TargetLocation;
+        if(GrapplingHook->TargetActor)
+        	SaveGame->GrapplingHookTargetActor = GrapplingHook->TargetActor;
+        if(GrapplingHook->TargetComponent)
+        	SaveGame->GrapplingHookTargetComponent = GrapplingHook->TargetComponent;
+	}
 	
-	SaveGame->GrapplingHookLocation = GrapplingHook->GetActorLocation();
-	SaveGame->GrapplingHookRotation = GrapplingHook->GetActorRotation();
-	SaveGame->bIsGrapplingHookActive = GrapplingHook->bIsPulling || GrapplingHook->bRetracting;
-	SaveGame->GrapplingHookTargetLocation = GrapplingHook->TargetLocation;
-	if(GrapplingHook->TargetActor)
-		SaveGame->GrapplingHookTargetActor = GrapplingHook->TargetActor;
-	if(GrapplingHook->TargetComponent)
-		SaveGame->GrapplingHookTargetComponent = GrapplingHook->TargetComponent;
+	// Portal data
+	if(const APortalSystem* PortalSystem = PlayerCharacter->ActivePortalSystem) {
+		if (PortalSystem->EntryPortal) {
+			SaveGame->EntryPortalLocation = PortalSystem->EntryPortal->GetActorLocation();
+			SaveGame->EntryPortalRotation = PortalSystem->EntryPortal->GetActorRotation();
+		}
+		if (PortalSystem->ExitPortal) {
+			SaveGame->ExitPortalLocation = PortalSystem->ExitPortal->GetActorLocation();
+			SaveGame->ExitPortalRotation = PortalSystem->ExitPortal->GetActorRotation();
+		}
+		SaveGame->TransformSnapshots = PortalSystem->TransformSnapshots;
+	}
 }
 
 void ABeatEmUpGameMode::PostBeginPlay() {

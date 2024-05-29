@@ -386,7 +386,7 @@ void ABeatEmUpCharacter::TeleportTick() {
 		return;
 	}
 
-	FTransform Snapshot = ActivePortalSystem->TransformSnapshots[CurrentSnapshotIndex].Transform;
+	FTransform Snapshot = ActivePortalSystem->TransformSnapshots[CurrentSnapshotIndex];
 
 	// Adjust rotation if moving backwards through the teleport
 	if (CurrentSpeedMultiplier < 0) {

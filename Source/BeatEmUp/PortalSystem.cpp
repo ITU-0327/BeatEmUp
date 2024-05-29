@@ -47,7 +47,7 @@ void APortalSystem::CreateExitPortal(const FVector& ExitLocation, const FRotator
 
 void APortalSystem::RecordSnapshot() {
 	if(const ABeatEmUpCharacter* Player = Cast<ABeatEmUpCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)))
-		TransformSnapshots.Add(FTransformSnapshot(Player->GetActorTransform()));
+		TransformSnapshots.Add(Player->GetActorTransform());
 }
 
 void APortalSystem::AutoEndPortal() {

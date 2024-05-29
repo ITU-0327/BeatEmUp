@@ -65,4 +65,18 @@ public:
 		AActor* GrapplingHookTargetActor;
 	UPROPERTY()
 		UPrimitiveComponent* GrapplingHookTargetComponent;
+	
+	// Portal data
+	UPROPERTY()
+		FVector EntryPortalLocation;
+	UPROPERTY()
+		FRotator EntryPortalRotation;
+	UPROPERTY()
+		FVector ExitPortalLocation;
+	UPROPERTY()
+		FRotator ExitPortalRotation;
+	UPROPERTY()
+		TArray<FTransform> TransformSnapshots;
+	UPROPERTY()
+		bool bIsPortalActive;
 };
