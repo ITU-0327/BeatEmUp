@@ -51,4 +51,18 @@ public:
 		TArray<FVector> EnemyMeshLocations;
 	UPROPERTY()
 		TArray<FVector> EnemyMeshVelocities;
+
+	// Grappling hook data
+	UPROPERTY()
+		FVector GrapplingHookLocation;
+	UPROPERTY()
+		FRotator GrapplingHookRotation;
+	UPROPERTY()
+		bool bIsGrapplingHookActive;
+	UPROPERTY()
+		FVector GrapplingHookTargetLocation;
+	UPROPERTY()
+		AActor* GrapplingHookTargetActor;
+	UPROPERTY()
+		UPrimitiveComponent* GrapplingHookTargetComponent;
 };

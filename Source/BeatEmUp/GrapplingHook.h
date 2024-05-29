@@ -23,7 +23,6 @@ public:
 		void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 
-protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -34,7 +33,6 @@ protected:
 	UPROPERTY(EditAnywhere, Category= "Components")
 		UCableComponent* CableComponent;
 
-private:
 	UPROPERTY(EditAnywhere, Category="Grappling Hook Setting")
 		float InitFlingSpeed = 2000.f;
 	UPROPERTY(EditAnywhere, Category="Grappling Hook Setting")
@@ -53,7 +51,6 @@ private:
 	bool bIsPulling = false;
 	bool bRetracting = false;
 
-public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 };

@@ -3,9 +3,6 @@
 #include "BeatEmUpGameMode.h"
 #include "BeatEmUpCharacter.h"
 #include "BeatEmUpGameInstance.h"
-#include "BrainComponent.h"
-#include "EnemyBTController.h"
-#include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
@@ -14,10 +11,8 @@ ABeatEmUpGameMode::ABeatEmUpGameMode()
 {
 	// set default pawn class to our Blueprinted character
 	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/ThirdPerson/Blueprints/BP_ThirdPersonCharacter"));
-	if (PlayerPawnBPClass.Class != NULL)
-	{
+	if(PlayerPawnBPClass.Class)
 		DefaultPawnClass = PlayerPawnBPClass.Class;
-	}
 }
 
 void ABeatEmUpGameMode::BeginPlay() {
@@ -29,6 +24,7 @@ void ABeatEmUpGameMode::BeginPlay() {
 }
 
 void ABeatEmUpGameMode::Load(UBeatEmUpSaveGame* LoadedGame) {
+	// Player data
 	ABeatEmUpCharacter* PlayerCharacter = Cast<ABeatEmUpCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	if (!PlayerCharacter) return;
 
@@ -40,6 +36,7 @@ void ABeatEmUpGameMode::Load(UBeatEmUpSaveGame* LoadedGame) {
 	PlayerCharacter->ExpToLevel = LoadedGame->PlayerExpToLevel;
 	PlayerCharacter->InGameUI->UpdateValues();
 
+	// Enemy data
 	for(int i = 0; i < LoadedGame->EnemyLocations.Num(); i++) {
 		AEnemy* SpawnedEnemy = Cast<AEnemy>(GetWorld()->SpawnActor(EnemyClass));
 		if (!SpawnedEnemy) continue;
@@ -58,9 +55,28 @@ void ABeatEmUpGameMode::Load(UBeatEmUpSaveGame* LoadedGame) {
 			SpawnedEnemy->StopRagdoll();
 		}
 	}
+
+	// Grappling hook data
+	AGrapplingHook* GrapplingHook = PlayerCharacter->LaunchedGrapplingHook;
+	if(!GrapplingHook) {
+		GrapplingHook = GetWorld()->SpawnActor<AGrapplingHook>(PlayerCharacter->GrapplingHookClass, LoadedGame->GrapplingHookLocation, LoadedGame->GrapplingHookRotation);
+		PlayerCharacter->LaunchedGrapplingHook = GrapplingHook;
+		GrapplingHook->Initiator = PlayerCharacter;
+	}
+	
+	GrapplingHook->TargetLocation = LoadedGame->GrapplingHookTargetLocation;
+	if(LoadedGame->bIsGrapplingHookActive)
+		PlayerCharacter->StartGrapplingHook(LoadedGame->GrapplingHookTargetLocation);
+
+	GrapplingHook->TargetActor = LoadedGame->GrapplingHookTargetActor;
+	GrapplingHook->TargetComponent = LoadedGame->GrapplingHookTargetComponent;
+
+	if(PlayerCharacter->GetRootComponent() && GrapplingHook->CableComponent)
+		GrapplingHook->CableComponent->SetAttachEndToComponent(PlayerCharacter->GetRootComponent());
 }
 
 void ABeatEmUpGameMode::Save(UBeatEmUpSaveGame* SaveGame) {
+	// Player data
 	const ABeatEmUpCharacter* PlayerCharacter = Cast<ABeatEmUpCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	if(!PlayerCharacter) return;
 	
@@ -72,6 +88,7 @@ void ABeatEmUpGameMode::Save(UBeatEmUpSaveGame* SaveGame) {
 	SaveGame->PlayerCurrentExp = PlayerCharacter->CurrentExp;
 	SaveGame->PlayerExpToLevel = PlayerCharacter->ExpToLevel;
 
+	// Enemy data
 	TArray<AActor*> Enemies;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AEnemy::StaticClass(), Enemies);
 	for (AActor* Enemy : Enemies) {
@@ -87,6 +104,19 @@ void ABeatEmUpGameMode::Save(UBeatEmUpSaveGame* SaveGame) {
 		SaveGame->EnemyMeshLocations.Add(EnemyCharacter->GetMesh()->GetComponentLocation());
 		SaveGame->EnemyMeshVelocities.Add(EnemyCharacter->GetMesh()->GetComponentVelocity());
 	}
+
+	// Grappling hook data
+	AGrapplingHook* GrapplingHook = PlayerCharacter->LaunchedGrapplingHook;
+	if(!GrapplingHook) return;
+	
+	SaveGame->GrapplingHookLocation = GrapplingHook->GetActorLocation();
+	SaveGame->GrapplingHookRotation = GrapplingHook->GetActorRotation();
+	SaveGame->bIsGrapplingHookActive = GrapplingHook->bIsPulling || GrapplingHook->bRetracting;
+	SaveGame->GrapplingHookTargetLocation = GrapplingHook->TargetLocation;
+	if(GrapplingHook->TargetActor)
+		SaveGame->GrapplingHookTargetActor = GrapplingHook->TargetActor;
+	if(GrapplingHook->TargetComponent)
+		SaveGame->GrapplingHookTargetComponent = GrapplingHook->TargetComponent;
 }
 
 void ABeatEmUpGameMode::PostBeginPlay() {

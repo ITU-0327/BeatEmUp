@@ -19,7 +19,7 @@ AGrapplingHook::AGrapplingHook() {
 	HookMesh->OnComponentHit.AddDynamic(this, &AGrapplingHook::OnHit);
 	RootComponent = HookMesh;
 	
-	// Setup the cable component for visual representation of the grappling hook cable
+	// Set up the cable component for visual representation of the grappling hook cable
 	CableComponent = CreateDefaultSubobject<UCableComponent>(TEXT("Cable"));
 	CableComponent->SetupAttachment(RootComponent);
 	CableComponent->SetVisibility(true);
