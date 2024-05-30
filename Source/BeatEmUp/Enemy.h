@@ -73,6 +73,15 @@ public:
 		TSubclassOf<ADynamicSpotlight> DynamicSpotlightClass;
 	UPROPERTY()
 		ADynamicSpotlight* Spotlight;
+
+	// Dynamic Material
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
+		UMaterialInstanceDynamic* EnemyMaterialInstance01;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
+		UMaterialInstanceDynamic* EnemyMaterialInstance02;
+	UPROPERTY(EditAnywhere, Category = "Materials")
+		float MaterialChangeFrequency = 3;
+	void UpdateMaterialBasedOnHealth();
 	
 	
 	// Called every frame

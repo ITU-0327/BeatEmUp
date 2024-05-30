@@ -217,6 +217,14 @@ public:
 	// Punch Effects
 	UPROPERTY(EditAnywhere, Category="Punch Effects")
 		UNiagaraSystem* PunchEffectClass;
+
+	// Dynamic Material
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
+		UMaterialInstanceDynamic* PlayerMaterialInstance01;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
+		UMaterialInstanceDynamic* PlayerMaterialInstance02;
+	void UpdateGrapplingMaterial();
+	void UpdatePortalMaterial();
 		
 	// Helper Functions
 	void DealDamage(float Damage);

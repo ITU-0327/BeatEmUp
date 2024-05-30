@@ -50,6 +50,32 @@ void AEnemy::BeginPlay() {
 		Spotlight = Cast<ADynamicSpotlight>(GetWorld()->SpawnActor(DynamicSpotlightClass, &SpawnLocation));
 		Spotlight->TargetActor = this;
 	}
+	
+	UMaterialInterface* Material01 = GetMesh()->GetMaterial(0);  // First material slot
+	UMaterialInterface* Material02 = GetMesh()->GetMaterial(1);  // Second material slot
+	EnemyMaterialInstance01 = UMaterialInstanceDynamic::Create(Material01, this);
+	EnemyMaterialInstance02 = UMaterialInstanceDynamic::Create(Material02, this);
+	GetMesh()->SetMaterial(0, EnemyMaterialInstance01);
+	GetMesh()->SetMaterial(1, EnemyMaterialInstance02);
+
+	UpdateMaterialBasedOnHealth();
+}
+
+void AEnemy::UpdateMaterialBasedOnHealth() {
+	if (EnemyMaterialInstance01 && EnemyMaterialInstance02) {
+		const float HealthPercentage = CurrentHealth / MaxHealth;
+		const FLinearColor HealthColor = FMath::Lerp(FLinearColor::Red, FLinearColor::Green, HealthPercentage);
+		const float Brightness = FMath::Lerp(0.0f, 1.0f, HealthPercentage);
+		const float Desaturation = FMath::Lerp(1.0f, 0.0f, HealthPercentage);
+
+		EnemyMaterialInstance01->SetVectorParameterValue("Tint", HealthColor);
+		EnemyMaterialInstance01->SetScalarParameterValue("Plastic_Brightness", Brightness);
+		EnemyMaterialInstance01->SetScalarParameterValue("Plastic_Desaturation", Desaturation);
+
+		EnemyMaterialInstance02->SetVectorParameterValue("Tint", HealthColor);
+		EnemyMaterialInstance02->SetScalarParameterValue("Plastic_Brightness", Brightness);
+		EnemyMaterialInstance02->SetScalarParameterValue("Plastic_Desaturation", Desaturation);
+	}
 }
 
 void AEnemy::UpdateWidgetRotation() const {
@@ -76,6 +102,15 @@ void AEnemy::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 
 	UpdateWidgetRotation();
+
+	if(GetMesh()->IsSimulatingPhysics()){
+		const float Brightness = 300 * sin(GetGameTimeSinceCreation() * MaterialChangeFrequency);
+    	EnemyMaterialInstance01->SetScalarParameterValue("Plastic_Brightness", Brightness);
+		EnemyMaterialInstance01->SetScalarParameterValue("Metal_Brightness", Brightness);
+
+		EnemyMaterialInstance02->SetScalarParameterValue("Plastic_Brightness", Brightness);
+		EnemyMaterialInstance02->SetScalarParameterValue("Metal_Brightness", Brightness);
+	}
 }
 
 // Called to bind functionality to input
@@ -93,6 +128,8 @@ void AEnemy::DealDamage(float Damage) {
 	SpawnedDamage->DamageText->SetText(FText::FromString(FString::SanitizeFloat(Damage)));
 	SpawnedDamage->TargetLocation += SpawnedDamage->CurrentLocation;
 	SpawnedDamage->AddToViewport();
+
+	UpdateMaterialBasedOnHealth();
 }
 
 void AEnemy::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector Normal,
@@ -141,4 +178,10 @@ void AEnemy::StopRagdoll() {
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0, 0, -90), FRotator(0, -90, 0));
 	GetCapsuleComponent()->SetCollisionProfileName("Pawn");
 	GetCharacterMovement()->GravityScale = 1;
+
+	EnemyMaterialInstance01->SetScalarParameterValue("Plastic_Brightness", 1);
+	EnemyMaterialInstance01->SetScalarParameterValue("Metal_Brightness", 1);
+
+	EnemyMaterialInstance02->SetScalarParameterValue("Plastic_Brightness", 1);
+	EnemyMaterialInstance02->SetScalarParameterValue("Metal_Brightness", 1);
 }

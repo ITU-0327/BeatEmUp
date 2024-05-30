@@ -55,7 +55,10 @@ void APortalSystem::AutoEndPortal() {
 	ExitPortal->Destroy();
 
 	// Clear the active portal system from the player character
-	if(ABeatEmUpCharacter* Player = Cast<ABeatEmUpCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)))
+	if(ABeatEmUpCharacter* Player = Cast<ABeatEmUpCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))) {
+		Player->ExitPortal();
 		Player->ActivePortalSystem = nullptr;
+	}
+	
 	Destroy();
 }

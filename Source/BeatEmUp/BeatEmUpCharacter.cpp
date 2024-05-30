@@ -77,6 +77,9 @@ void ABeatEmUpCharacter::Tick(float DeltaTime) {
 	if(GetWorld()->GetTimerManager().TimerExists(PunchTimerHandle))
 		InGameUI->UpdateValues();
 
+	if(bIsGrapplingHookActive)
+		UpdateGrapplingMaterial();
+
 	if(bIsGrappling) {
 		FVector Direction = (GrapplingHookTarget - GetActorLocation()).GetSafeNormal();
         GrapplingForce += Direction * GrapplingHookAcceleration * DeltaTime;
@@ -99,8 +102,10 @@ void ABeatEmUpCharacter::Tick(float DeltaTime) {
 	}
 		
 	// If the character is currently in a portal, process teleportation mechanics
-	if (bIsInPortal && ActivePortalSystem)
+	if(bIsInPortal && ActivePortalSystem) {
+		UpdatePortalMaterial();
 		TeleportTick();
+	}
 }
 
 void ABeatEmUpCharacter::BeginPlay()
@@ -119,6 +124,13 @@ void ABeatEmUpCharacter::BeginPlay()
 	InGameUI->Player = this;
 	InGameUI->UpdateValues();
 	InGameUI->AddToViewport();
+
+	UMaterialInterface* Material01 = GetMesh()->GetMaterial(0);
+	UMaterialInterface* Material02 = GetMesh()->GetMaterial(1);
+	PlayerMaterialInstance01 = UMaterialInstanceDynamic::Create(Material01, this);
+	PlayerMaterialInstance02 = UMaterialInstanceDynamic::Create(Material02, this);
+	GetMesh()->SetMaterial(0, PlayerMaterialInstance01);
+	GetMesh()->SetMaterial(1, PlayerMaterialInstance02);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -224,6 +236,29 @@ void ABeatEmUpCharacter::PauseGame() {
 	}
 }
 
+void ABeatEmUpCharacter::UpdateGrapplingMaterial() {
+	if(!PlayerMaterialInstance01 || !PlayerMaterialInstance02) return;
+
+	PlayerMaterialInstance01->SetScalarParameterValue("Metal_Desaturation", -5);
+    PlayerMaterialInstance02->SetScalarParameterValue("Metal_Desaturation", -5);
+}
+
+void ABeatEmUpCharacter::UpdatePortalMaterial() {
+	if(!PlayerMaterialInstance01 || !PlayerMaterialInstance02) return;
+	if(!bIsInPortal) return;
+	
+	float Frequency = 5.0f;
+	const float Brightness = -200 * abs(sin(GetGameTimeSinceCreation() * Frequency));
+	FLinearColor InitialTint(0, 0.6f, 1.0f);
+	PlayerMaterialInstance01->SetVectorParameterValue("Tint", InitialTint);
+	PlayerMaterialInstance01->SetScalarParameterValue("Plastic_Brightness", Brightness);
+	PlayerMaterialInstance01->SetScalarParameterValue("Metal_Brightness", Brightness);
+
+	PlayerMaterialInstance02->SetVectorParameterValue("Tint", InitialTint);
+	PlayerMaterialInstance02->SetScalarParameterValue("Plastic_Brightness", Brightness);
+	PlayerMaterialInstance02->SetScalarParameterValue("Metal_Brightness", Brightness);
+}
+
 void ABeatEmUpCharacter::DealDamage(float Damage) {
 	CurrentHealth = FMath::Clamp(CurrentHealth - Damage, 0.f, MaxHealth);
 
@@ -285,6 +320,9 @@ void ABeatEmUpCharacter::StartGrapplingHook(const FVector& TargetLocation) {
 
 void ABeatEmUpCharacter::StopGrapplingHook() {
 	if(!bIsGrappling) return;
+	
+	PlayerMaterialInstance01->SetScalarParameterValue("Metal_Desaturation", 0);
+	PlayerMaterialInstance02->SetScalarParameterValue("Metal_Desaturation", 0);
 
 	bIsGrappling = false;
 	bIsGrapplingHookActive = false;
@@ -369,6 +407,17 @@ void ABeatEmUpCharacter::ExitPortal() {
 	bIsInPortal = false;
 	CurrentSnapshotIndex = 0;
 	TeleportTrailComponent->DeactivateSystem();
+
+	if(!PlayerMaterialInstance01 || !PlayerMaterialInstance02) return;
+	
+	FLinearColor InitialTint(1.0f, 1.0f, 1.0f);
+	PlayerMaterialInstance01->SetVectorParameterValue("Tint", InitialTint);
+	PlayerMaterialInstance01->SetScalarParameterValue("Plastic_Brightness", 1);
+	PlayerMaterialInstance01->SetScalarParameterValue("Metal_Brightness", 1);
+
+	PlayerMaterialInstance02->SetVectorParameterValue("Tint", InitialTint);
+	PlayerMaterialInstance02->SetScalarParameterValue("Plastic_Brightness", 1);
+	PlayerMaterialInstance02->SetScalarParameterValue("Metal_Brightness", 1);
 }
 
 void ABeatEmUpCharacter::SetPortalCooldown() {
