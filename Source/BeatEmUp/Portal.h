@@ -25,7 +25,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Portal Settings")
-		UStaticMeshComponent* PortalMesh;
+		UStaticMeshComponent* Mesh;
 	bool bIsPortalActive = false;
 
 	// Portal Sparkle Effect
@@ -35,6 +35,18 @@ public:
 		FLinearColor ColorMaximum = FLinearColor(0.0f, 0.1f, 1.0f);
 	UPROPERTY(EditAnywhere, Category = "Portal Settings")
 		FLinearColor ColorMinimum = FLinearColor(0.0f, 1.0f, 1.0f);
+
+	// Portal Material
+	UPROPERTY(EditAnywhere, Category = "Portal Settings")
+		UMaterialInterface* PortalMaterialClass;
+	UPROPERTY()
+		UMaterialInstanceDynamic* PortalMaterialInstance;
+	UPROPERTY(EditAnywhere, Category = "Portal Settings")
+		float InactiveGlowAmount = 3.0f;
+	UPROPERTY(EditAnywhere, Category = "Portal Settings")
+		float ActiveGlowAmount = 400.0f;
+	UPROPERTY(EditAnywhere, Category = "Portal Settings")
+		FLinearColor BaseColor = FLinearColor(0.0f, 0.002917f, 0.029167f);
 
 	UFUNCTION()
 		void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,

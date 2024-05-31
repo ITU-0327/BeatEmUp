@@ -12,18 +12,28 @@ APortal::APortal() {
 	PrimaryActorTick.bCanEverTick = true;
 
 	// Create and configure the portal mesh with collision properties
-	PortalMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Portal Mesh"));
-	PortalMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	PortalMesh->SetCollisionResponseToAllChannels(ECR_Ignore);
-	PortalMesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
-	PortalMesh->OnComponentBeginOverlap.AddDynamic(this, &APortal::OnOverlapBegin);
+	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Portal Mesh"));
+	Mesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	Mesh->SetCollisionResponseToAllChannels(ECR_Ignore);
+	Mesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+	Mesh->OnComponentBeginOverlap.AddDynamic(this, &APortal::OnOverlapBegin);
 
-	RootComponent = PortalMesh;
+	RootComponent = Mesh;
 }
 
 // Called when the game starts or when spawned
 void APortal::BeginPlay() {
 	Super::BeginPlay();
+
+	if(!PortalMaterialClass) return;
+
+	PortalMaterialInstance = UMaterialInstanceDynamic::Create(PortalMaterialClass, this);
+	Mesh->SetMaterial(0, PortalMaterialInstance);
+
+	if(PortalMaterialInstance) {
+		PortalMaterialInstance->SetScalarParameterValue(FName("GlowAmount"), InactiveGlowAmount);
+		PortalMaterialInstance->SetVectorParameterValue(FName("BaseColor"), BaseColor);
+	}
 }
 
 // Called every frame
@@ -44,7 +54,7 @@ void APortal::SpawnPortalEffect() const {
 	if(PortalSparkleEffect) {
 		UNiagaraComponent* SpawnedEffect = UNiagaraFunctionLibrary::SpawnSystemAttached(
 			PortalSparkleEffect,
-			PortalMesh,
+			Mesh,
 			NAME_None,
 			FVector::ZeroVector,
 			FRotator::ZeroRotator,
@@ -58,7 +68,11 @@ void APortal::SpawnPortalEffect() const {
 		
 		SpawnedEffect->SetVariableLinearColor(FName("ColorMaximum"), ColorMaximum);
 		SpawnedEffect->SetVariableLinearColor(FName("ColorMinimum"), ColorMinimum);
+		SpawnedEffect->SetVariableFloat(FName("SpawnRate"), 15000.0f);
 	}
+	
+	if(PortalMaterialInstance)
+		PortalMaterialInstance->SetScalarParameterValue(FName("GlowAmount"), ActiveGlowAmount);
 }
 
 void APortal::ActivatePortal() {

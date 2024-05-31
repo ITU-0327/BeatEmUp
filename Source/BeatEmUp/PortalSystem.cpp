@@ -48,8 +48,14 @@ void APortalSystem::CreateExitPortal(const FVector& ExitLocation, const FRotator
 }
 
 void APortalSystem::RecordSnapshot() {
-	if(const ABeatEmUpCharacter* Player = Cast<ABeatEmUpCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)))
-		TransformSnapshots.Add(Player->GetActorTransform());
+	if(const ABeatEmUpCharacter* Player = Cast<ABeatEmUpCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))) {
+		const FTransform CurrentTransform = Player->GetActorTransform();
+
+		// Check if there are any snapshots recorded
+		if(TransformSnapshots.Num() != 0 && CurrentTransform.Equals(TransformSnapshots.Last(), 0.01f)) return;
+
+		TransformSnapshots.Add(CurrentTransform);
+	}
 }
 
 void APortalSystem::AutoEndPortal() {
