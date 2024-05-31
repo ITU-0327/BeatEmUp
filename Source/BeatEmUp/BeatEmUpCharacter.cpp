@@ -398,6 +398,12 @@ void ABeatEmUpCharacter::EnterPortal(const APortal* Portal) {
 		CurrentSnapshotIndex = 0;
 		CurrentSpeedMultiplier = SpeedMultiplier;
 	}
+
+	if(!SpawnedLightActor && TeleportLightActorClass) {
+		const FVector LightLocation = GetActorLocation();
+		SpawnedLightActor = Cast<ATeleportLight>(GetWorld()->SpawnActor(TeleportLightActorClass, &LightLocation));
+		SpawnedLightActor->TotalSnapshots = ActivePortalSystem->TransformSnapshots.Num();
+	}
 }
 
 void ABeatEmUpCharacter::ExitPortal() {
@@ -418,6 +424,11 @@ void ABeatEmUpCharacter::ExitPortal() {
 	PlayerMaterialInstance02->SetVectorParameterValue("Tint", InitialTint);
 	PlayerMaterialInstance02->SetScalarParameterValue("Plastic_Brightness", 1);
 	PlayerMaterialInstance02->SetScalarParameterValue("Metal_Brightness", 1);
+	
+	if(SpawnedLightActor) {
+		SpawnedLightActor->Destroy();
+		SpawnedLightActor = nullptr;
+	}
 }
 
 void ABeatEmUpCharacter::SetPortalCooldown() {
@@ -446,6 +457,10 @@ void ABeatEmUpCharacter::TeleportTick() {
 
 	SetActorTransform(Snapshot);
 	CurrentSnapshotIndex += CurrentSpeedMultiplier;
+
+	// Update the light properties based on the current snapshot index
+	if(SpawnedLightActor)
+		SpawnedLightActor->UpdateLightProperties(CurrentSnapshotIndex);
 }
 
 //////////////////////////////////////////////////////////////////////////

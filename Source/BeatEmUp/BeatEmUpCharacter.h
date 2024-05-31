@@ -8,6 +8,7 @@
 #include "InGameUI.h"
 #include "PortalSystem.h"
 #include "NiagaraFunctionLibrary.h"
+#include "TeleportLight.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "Windows/AllowWindowsPlatformTypes.h"
@@ -225,6 +226,12 @@ public:
 		UMaterialInstanceDynamic* PlayerMaterialInstance02;
 	void UpdateGrapplingMaterial();
 	void UpdatePortalMaterial();
+
+	// Dynamic Spotlight
+	UPROPERTY(EditDefaultsOnly, Category = "Portal Settings")
+		TSubclassOf<ATeleportLight> TeleportLightActorClass;
+	UPROPERTY()
+		ATeleportLight* SpawnedLightActor;
 		
 	// Helper Functions
 	void DealDamage(float Damage);
