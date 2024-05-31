@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/PointLightComponent.h"
 #include "GameFramework/Actor.h"
 #include "Grenade.generated.h"
 
@@ -25,6 +26,8 @@ public:
 
 	UPROPERTY(EditAnywhere, Category="Components")
 		UStaticMeshComponent* Mesh;
+	UPROPERTY(EditAnywhere, Category="Components")
+		UPointLightComponent* GrenadeLight;
 	UPROPERTY(EditAnywhere, Category="Grenade Effect")
 		UParticleSystem* ExplosionEffect;
 	UPROPERTY(EditAnywhere, Category="Grenade Effect")
@@ -38,6 +41,8 @@ public:
 		float ExplosionDamage = 300;
 	UPROPERTY(EditAnywhere, Category="Grenade Settings")
 		float TimeToExplode = 3.5f;
+	UPROPERTY(EditAnywhere, Category="Light Settings")
+		float LightIntensity = 3000.f;
 	
 	UFUNCTION()
 		void Initialize(const FVector& ThrowDirection, bool bDebug);
@@ -47,4 +52,8 @@ public:
 private:
 	FTimerHandle TimerHandle_Explosion;
 	bool bEnableDebug;
+	float TimeRemaining;
+	float FlashFrequency;
+
+	void UpdateLightFlash(float DeltaTime);
 };

@@ -14,6 +14,12 @@ AGrenade::AGrenade() {
 
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	RootComponent = Mesh;
+	
+	GrenadeLight = CreateDefaultSubobject<UPointLightComponent>(TEXT("GrenadeLight"));
+	GrenadeLight->SetupAttachment(RootComponent);
+	GrenadeLight->Intensity = LightIntensity;
+	GrenadeLight->SetLightColor(FLinearColor::Red);
+	GrenadeLight->SetVisibility(true);
 }
 
 // Called when the game starts or when spawned
@@ -22,11 +28,19 @@ void AGrenade::BeginPlay() {
 	
 	// Set a timer to trigger the explosion after a predefined delay
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle_Explosion, this, &AGrenade::Explode, TimeToExplode, false);
+
+	TimeRemaining = TimeToExplode;
+	FlashFrequency = 1.0f;
 }
 
 // Called every frame
 void AGrenade::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
+
+	TimeRemaining -= DeltaTime;
+
+	// Update the light flash frequency
+	UpdateLightFlash(DeltaTime);
 }
 
 void AGrenade::Initialize(const FVector& ThrowDirection, const bool bDebug) {
@@ -72,4 +86,18 @@ void AGrenade::Explode() {
 		DrawDebugSphere(GetWorld(), GetActorLocation(), ExplosionRadius, 32, FColor::Red, false, 5.0f);
 
 	Destroy();
+}
+
+void AGrenade::UpdateLightFlash(float DeltaTime) {
+	// Update the flash frequency based on the remaining time
+	FlashFrequency = FMath::Clamp((TimeToExplode - TimeRemaining) / TimeToExplode * 15.0f, 1.0f, 20.0f);
+
+	// Flash the light on and off
+	float FlashInterval = 1.0f / FlashFrequency;
+	static float TimeAccumulator = 0.0f;
+	TimeAccumulator += DeltaTime;
+	if (TimeAccumulator >= FlashInterval) {
+		GrenadeLight->ToggleVisibility();
+		TimeAccumulator = 0.0f;
+	}
 }
