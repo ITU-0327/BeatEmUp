@@ -364,7 +364,7 @@ void ABeatEmUpCharacter::StartPortalCreation() {
 	
 	if(!ActivePortalSystem) {
 		ActivePortalSystem = GetWorld()->SpawnActor<APortalSystem>(PortalSystemClass);
-		ActivePortalSystem->CreateEntryPortal(GetActorLocation(), GetActorRotation());
+		ActivePortalSystem->CreateEntryPortal(GetActorLocation(), GetActorRotation() + FRotator(90.0f, 0.0f, 0.0f));
 		SetPortalCooldown();
 	}
 	else if(ActivePortalSystem->EntryPortal && !ActivePortalSystem->ExitPortal)
@@ -379,7 +379,7 @@ void ABeatEmUpCharacter::EndPortalCreation() {
 	if(bIsInPortal) return;
 
 	bIsPortalReady = false;
-	ActivePortalSystem->CreateExitPortal(GetActorLocation(), GetActorRotation());
+	ActivePortalSystem->CreateExitPortal(GetActorLocation(), GetActorRotation() + FRotator(90.0f, 0.0f, 0.0f));
 }
 
 void ABeatEmUpCharacter::EnterPortal(const APortal* Portal) {

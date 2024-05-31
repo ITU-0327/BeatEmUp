@@ -178,7 +178,7 @@ public:
 	UPROPERTY(EditAnywhere, Category="Portal Settings")
 		float PortalRange = 3000.0f;
 	UPROPERTY(EditAnywhere, Category="Portal Settings")
-		int SpeedMultiplier = 2;
+		int SpeedMultiplier = 3;
 	int CurrentSpeedMultiplier = SpeedMultiplier;
 	bool bIsInPortal = false;
 	bool bIsPortalReady = true;
