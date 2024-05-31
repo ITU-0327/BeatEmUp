@@ -4,6 +4,7 @@
 #include "Portal.h"
 
 #include "BeatEmUpCharacter.h"
+#include "NiagaraComponent.h"
 
 // Sets default values
 APortal::APortal() {
@@ -37,4 +38,32 @@ void APortal::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherA
 	if(ABeatEmUpCharacter* Player = Cast<ABeatEmUpCharacter>(OtherActor))
 		Player->EnterPortal(this);
 	UE_LOG(LogTemp, Warning, TEXT("Portal(%s) Overlap with %s"), *GetName(), *OtherActor->GetName());
+}
+
+void APortal::SpawnPortalEffect() const {
+	if(PortalSparkleEffect) {
+		UNiagaraComponent* SpawnedEffect = UNiagaraFunctionLibrary::SpawnSystemAttached(
+			PortalSparkleEffect,
+			PortalMesh,
+			NAME_None,
+			FVector::ZeroVector,
+			FRotator::ZeroRotator,
+			EAttachLocation::KeepRelativeOffset,
+			true
+		);
+		if(!SpawnedEffect) return;
+	
+		SpawnedEffect->SetRelativeRotation(FRotator(90.0f, 0.0f, 0.0f));
+		SpawnedEffect->SetRelativeScale3D(FVector(0.5f));
+		
+		SpawnedEffect->SetVariableLinearColor(FName("ColorMaximum"), ColorMaximum);
+		SpawnedEffect->SetVariableLinearColor(FName("ColorMinimum"), ColorMinimum);
+	}
+}
+
+void APortal::ActivatePortal() {
+	if(bIsPortalActive) return;
+	
+	bIsPortalActive = true;
+	SpawnPortalEffect();
 }

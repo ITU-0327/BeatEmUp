@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "NiagaraSystem.h"
 #include "GameFramework/Actor.h"
 #include "Portal.generated.h"
 
@@ -27,7 +28,17 @@ public:
 		UStaticMeshComponent* PortalMesh;
 	bool bIsPortalActive = false;
 
+	// Portal Sparkle Effect
+	UPROPERTY(EditAnywhere, Category = "Portal Settings")
+		UNiagaraSystem* PortalSparkleEffect;
+	UPROPERTY(EditAnywhere, Category = "Portal Settings")
+		FLinearColor ColorMaximum = FLinearColor(0.0f, 0.1f, 1.0f);
+	UPROPERTY(EditAnywhere, Category = "Portal Settings")
+		FLinearColor ColorMinimum = FLinearColor(0.0f, 1.0f, 1.0f);
+
 	UFUNCTION()
 		void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 							int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	void SpawnPortalEffect() const;
+	void ActivatePortal();
 };

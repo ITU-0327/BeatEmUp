@@ -27,19 +27,21 @@ void APortalSystem::Tick(float DeltaTime) {
 }
 
 void APortalSystem::CreateEntryPortal(const FVector& EntryLocation, const FRotator& EntryRotation) {
-	EntryPortal = GetWorld()->SpawnActor(PortalClass, &EntryLocation, &EntryRotation, FActorSpawnParameters());
+	const FRotator AdjustedRotation = EntryRotation + FRotator(90.0f, 0.0f, 0.0f);
+	EntryPortal = GetWorld()->SpawnActor(PortalClass, &EntryLocation, &AdjustedRotation, FActorSpawnParameters());
 	if(!EntryPortal)
 		UE_LOG(LogTemp, Error, TEXT("Failed to spawn entry portal"));
 }
 
 void APortalSystem::CreateExitPortal(const FVector& ExitLocation, const FRotator& ExitRotation) {
-	ExitPortal = GetWorld()->SpawnActor(PortalClass, &ExitLocation, &ExitRotation, FActorSpawnParameters());
+	const FRotator AdjustedRotation = ExitRotation + FRotator(90.0f, 0.0f, 0.0f);
+	ExitPortal = GetWorld()->SpawnActor(PortalClass, &ExitLocation, &AdjustedRotation, FActorSpawnParameters());
 	if(!ExitPortal) {
 		UE_LOG(LogTemp, Error, TEXT("Failed to spawn exit portal"));
 		return;
 	}
-	Cast<APortal>(EntryPortal)->bIsPortalActive = true;
-	Cast<APortal>(ExitPortal)->bIsPortalActive = true;
+	Cast<APortal>(EntryPortal)->ActivatePortal();
+	Cast<APortal>(ExitPortal)->ActivatePortal();
 
 	// Set a timer to automatically end the portal session after a duration
 	GetWorld()->GetTimerManager().SetTimer(PortalTimerHandle, this, &APortalSystem::AutoEndPortal, PortalDuration, false);
