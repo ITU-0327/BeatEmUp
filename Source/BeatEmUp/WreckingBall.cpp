@@ -35,13 +35,13 @@ AWreckingBall::AWreckingBall() {
 	ConstraintComp->ComponentName2.ComponentName = TEXT("BallMesh");
 
 	// Configure the constraint to limit movement exactly to the cable length
-	ConstraintComp->SetLinearZLimit(ELinearConstraintMotion::LCM_Limited, 300);
-	ConstraintComp->SetLinearXLimit(ELinearConstraintMotion::LCM_Locked, 0);
+	ConstraintComp->SetLinearZLimit(ELinearConstraintMotion::LCM_Locked, 0);
+	ConstraintComp->SetLinearXLimit(ELinearConstraintMotion::LCM_Limited, 400);
 	ConstraintComp->SetLinearYLimit(ELinearConstraintMotion::LCM_Locked, 0);
 
-	ConstraintComp->SetAngularSwing1Limit(EAngularConstraintMotion::ACM_Locked, 0);
-	ConstraintComp->SetAngularSwing2Limit(EAngularConstraintMotion::ACM_Locked, 0);
-	ConstraintComp->SetAngularTwistLimit(EAngularConstraintMotion::ACM_Locked, 0);
+	ConstraintComp->SetAngularSwing1Limit(EAngularConstraintMotion::ACM_Free, 0);
+	ConstraintComp->SetAngularSwing2Limit(EAngularConstraintMotion::ACM_Limited, 89);
+	ConstraintComp->SetAngularTwistLimit(EAngularConstraintMotion::ACM_Free, 0);
 }
 
 // Called when the game starts or when spawned
