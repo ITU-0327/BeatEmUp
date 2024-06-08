@@ -150,6 +150,10 @@ void AEnemyBTController::HideInvestigatingIcon() const {
 		Enemy->HealthBar->HideInvestigateIcon();
 }
 
+void AEnemyBTController::SetIsRewinding(const bool bIsRewinding) {
+	BlackboardComponent->SetValueAsBool("IsRewinding", bIsRewinding);
+}
+
 void AEnemyBTController::DrawDebugVision() const {
 	if(!bDrawDebug) return;
 	if (!GetPawn()) return;

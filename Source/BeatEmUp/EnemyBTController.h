@@ -68,6 +68,7 @@ public:
 	void HideWarningIcon() const;
 	void ShowInvestigatingIcon() const;
 	void HideInvestigatingIcon() const;
+	void SetIsRewinding(bool bIsRewinding);
 
 	// Debug
 	UPROPERTY(EditAnywhere, Category="Enemy Settings")

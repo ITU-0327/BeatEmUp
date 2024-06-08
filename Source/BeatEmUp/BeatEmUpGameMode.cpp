@@ -3,12 +3,12 @@
 #include "BeatEmUpGameMode.h"
 #include "BeatEmUpCharacter.h"
 #include "BeatEmUpGameInstance.h"
+#include "EnemyBTController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
 
-ABeatEmUpGameMode::ABeatEmUpGameMode()
-{
+ABeatEmUpGameMode::ABeatEmUpGameMode() {
 	// set default pawn class to our Blueprinted character
 	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/ThirdPerson/Blueprints/BP_ThirdPersonCharacter"));
 	if(PlayerPawnBPClass.Class)
@@ -39,6 +39,18 @@ void ABeatEmUpGameMode::RewindAllReversibleActors() const {
 	for(AActor* Actor : ReversibleActors)
 		if(IReversible* ReversibleActor = Cast<IReversible>(Actor))
 			ReversibleActor->RewindState();
+}
+
+void ABeatEmUpGameMode::SetRewindStatusForEnemies(bool bIsRewinding) {
+	TArray<AActor*> Enemies;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AEnemy::StaticClass(), Enemies);
+
+	for(AActor* Enemy : Enemies) {
+		if(AEnemy* EnemyCharacter = Cast<AEnemy>(Enemy)) {
+			if (AEnemyBTController* EnemyController = Cast<AEnemyBTController>(EnemyCharacter->GetController()))
+				EnemyController->SetIsRewinding(bIsRewinding);
+		}
+	}
 }
 
 void ABeatEmUpGameMode::Load(UBeatEmUpSaveGame* LoadedGame) const {

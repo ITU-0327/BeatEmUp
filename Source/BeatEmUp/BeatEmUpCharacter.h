@@ -243,6 +243,7 @@ public:
 	virtual void RewindState() override;
 	void NotifyRewindAll() const;
 	void NotifyRecordAll();
+	void NotifyRewindStatus(bool bRewindingStatus);
 
 	// Reverse
 	UPROPERTY(EditAnywhere, Category="Reverse Settings")

@@ -114,6 +114,9 @@ void AEnemy::RewindState() {
 		SetActorLocation(RecordedLocations.Pop());
 		SetActorRotation(RecordedRotations.Pop());
 		CurrentHealth = RecordedHealths.Pop();
+		
+		if(HealthBar) HealthBar->UpdateValues();
+		UpdateMaterialBasedOnHealth();
 	}
 }
 

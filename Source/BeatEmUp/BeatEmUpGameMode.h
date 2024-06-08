@@ -23,6 +23,7 @@ public:
 
 	void RecordAllReversibleActors() const;
 	void RewindAllReversibleActors() const;
+	void SetRewindStatusForEnemies(bool bIsRewinding);
 	void Load(UBeatEmUpSaveGame* LoadedGame) const;
 	void Save(UBeatEmUpSaveGame* SaveGame) const;
 	UFUNCTION()

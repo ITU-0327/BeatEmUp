@@ -286,6 +286,7 @@ void ABeatEmUpCharacter::RewindState() {
 		SetActorLocation(RecordedLocations.Pop());
 		SetActorRotation(RecordedRotations.Pop());
 		CurrentHealth = RecordedHealths.Pop();
+		InGameUI->UpdateValues();
 	}
 	else
 		StopRewind(); 
@@ -307,12 +308,19 @@ void ABeatEmUpCharacter::NotifyRecordAll() {
 		GameMode->RecordAllReversibleActors();
 }
 
+void ABeatEmUpCharacter::NotifyRewindStatus(bool bRewindingStatus) {
+	// Notify the game mode to set the rewind status for all enemies
+	if (ABeatEmUpGameMode* GameMode = Cast<ABeatEmUpGameMode>(UGameplayStatics::GetGameMode(this)))
+		GameMode->SetRewindStatusForEnemies(bRewindingStatus);
+}
+
 void ABeatEmUpCharacter::ActivateRewind() {
 	if(bIsRewinding) return;
 	if(RecordedLocations.Num() == 0) return;
 
 	bIsRewinding = true;
 	GetWorld()->GetTimerManager().SetTimer(RewindTimerHandle, this, &ABeatEmUpCharacter::NotifyRewindAll, RecordingInterval, true);
+	NotifyRewindStatus(true);
 }
 
 void ABeatEmUpCharacter::StopRewind() {
@@ -320,6 +328,7 @@ void ABeatEmUpCharacter::StopRewind() {
 
 	bIsRewinding = false;
 	GetWorld()->GetTimerManager().ClearTimer(RewindTimerHandle);
+	NotifyRewindStatus(false);
 }
 
 void ABeatEmUpCharacter::DealDamage(float Damage) {
