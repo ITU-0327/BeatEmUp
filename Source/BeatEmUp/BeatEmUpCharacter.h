@@ -8,6 +8,7 @@
 #include "InGameUI.h"
 #include "PortalSystem.h"
 #include "NiagaraFunctionLibrary.h"
+#include "Reversible.h"
 #include "TeleportLight.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
@@ -23,7 +24,7 @@ struct FInputActionValue;
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
 UCLASS(config=Game)
-class ABeatEmUpCharacter : public ACharacter
+class ABeatEmUpCharacter : public ACharacter, public IReversible
 {
 	GENERATED_BODY()
 
@@ -76,6 +77,10 @@ class ABeatEmUpCharacter : public ACharacter
 	/** Pause Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* PauseAction;
+
+	/** Rewind Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* RewindAction;
 	
 public:
 	ABeatEmUpCharacter();
@@ -232,7 +237,28 @@ public:
 		TSubclassOf<ATeleportLight> TeleportLightActorClass;
 	UPROPERTY()
 		ATeleportLight* SpawnedLightActor;
-		
+
+	// Reversible Interface
+	virtual void RecordState() override;
+	virtual void RewindState() override;
+
+	// Reverse
+	UPROPERTY(EditAnywhere, Category="Reverse Settings")
+		float RewindDuration = 5.0f;
+	UPROPERTY(EditAnywhere, Category="Reverse Settings")
+		float RecordingInterval = 0.01f;
+	int32 MaxRecordedStates = RewindDuration / RecordingInterval;
+
+	void ActivateRewind();
+	void StopRewind();
+	
+	TArray<FVector> RecordedLocations;
+	TArray<FRotator> RecordedRotations;
+	TArray<int> RecordedHealths;
+	FTimerHandle RecordingTimerHandle;
+	FTimerHandle RewindTimerHandle;
+	bool bIsRewinding;
+	
 	// Helper Functions
 	void DealDamage(float Damage);
 

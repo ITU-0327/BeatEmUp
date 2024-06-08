@@ -23,7 +23,25 @@ void ABeatEmUpGameMode::BeginPlay() {
 	GetWorld()->OnWorldBeginPlay.AddUObject(this, &ABeatEmUpGameMode::PostBeginPlay);
 }
 
-void ABeatEmUpGameMode::Load(UBeatEmUpSaveGame* LoadedGame) {
+void ABeatEmUpGameMode::RecordAllReversibleActors() const {
+	TArray<AActor*> ReversibleActors;
+	UGameplayStatics::GetAllActorsWithInterface(GetWorld(), UReversible::StaticClass(), ReversibleActors);
+
+	for(AActor* Actor : ReversibleActors)
+		if(IReversible* ReversibleActor = Cast<IReversible>(Actor))
+			ReversibleActor->RecordState();
+}
+
+void ABeatEmUpGameMode::RewindAllReversibleActors() const {
+	TArray<AActor*> ReversibleActors;
+	UGameplayStatics::GetAllActorsWithInterface(GetWorld(), UReversible::StaticClass(), ReversibleActors);
+
+	for(AActor* Actor : ReversibleActors)
+		if(IReversible* ReversibleActor = Cast<IReversible>(Actor))
+			ReversibleActor->RewindState();
+}
+
+void ABeatEmUpGameMode::Load(UBeatEmUpSaveGame* LoadedGame) const {
 	// Player data
 	ABeatEmUpCharacter* PlayerCharacter = Cast<ABeatEmUpCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	if (!PlayerCharacter) return;
@@ -85,7 +103,7 @@ void ABeatEmUpGameMode::Load(UBeatEmUpSaveGame* LoadedGame) {
 	}
 }
 
-void ABeatEmUpGameMode::Save(UBeatEmUpSaveGame* SaveGame) {
+void ABeatEmUpGameMode::Save(UBeatEmUpSaveGame* SaveGame) const {
 	// Player data
 	const ABeatEmUpCharacter* PlayerCharacter = Cast<ABeatEmUpCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	if(!PlayerCharacter) return;

@@ -2,6 +2,7 @@
 
 #include "BeatEmUpCharacter.h"
 
+#include "BeatEmUpGameMode.h"
 #include "Enemy.h"
 #include "Engine/LocalPlayer.h"
 #include "Camera/CameraComponent.h"
@@ -131,6 +132,9 @@ void ABeatEmUpCharacter::BeginPlay()
 	PlayerMaterialInstance02 = UMaterialInstanceDynamic::Create(Material02, this);
 	GetMesh()->SetMaterial(0, PlayerMaterialInstance01);
 	GetMesh()->SetMaterial(1, PlayerMaterialInstance02);
+
+	bIsRewinding = false;
+	GetWorld()->GetTimerManager().SetTimer(RecordingTimerHandle, this, &ABeatEmUpCharacter::RecordState, RecordingInterval, true);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -257,6 +261,49 @@ void ABeatEmUpCharacter::UpdatePortalMaterial() {
 	PlayerMaterialInstance02->SetVectorParameterValue("Tint", InitialTint);
 	PlayerMaterialInstance02->SetScalarParameterValue("Plastic_Brightness", Brightness);
 	PlayerMaterialInstance02->SetScalarParameterValue("Metal_Brightness", Brightness);
+}
+
+void ABeatEmUpCharacter::RecordState() {
+	if (bIsRewinding) return;
+
+	if (RecordedLocations.Num() >= MaxRecordedStates) {
+		RecordedLocations.RemoveAt(0);
+		RecordedRotations.RemoveAt(0);
+	}
+
+	RecordedLocations.Add(GetActorLocation());
+	RecordedRotations.Add(GetActorRotation());
+}
+
+void ABeatEmUpCharacter::RewindState() {
+	if(RecordedLocations.Num() > 0) {
+		SetActorLocation(RecordedLocations.Pop());
+		SetActorRotation(RecordedRotations.Pop());
+	}
+	else
+		StopRewind(); 
+}
+
+void ABeatEmUpCharacter::ActivateRewind() {
+	if(bIsRewinding) return;
+	if(RecordedLocations.Num() == 0) return;
+
+	bIsRewinding = true;
+	GetWorld()->GetTimerManager().SetTimer(RewindTimerHandle, this, &ABeatEmUpCharacter::RewindState, RecordingInterval, true);
+
+	// Notify the game mode to rewind all reversible actors
+	if(ABeatEmUpGameMode* GameMode = Cast<ABeatEmUpGameMode>(UGameplayStatics::GetGameMode(this)))
+		GameMode->RewindAllReversibleActors();
+}
+void ABeatEmUpCharacter::StopRewind() {
+	if(!bIsRewinding) return;
+
+	bIsRewinding = false;
+	GetWorld()->GetTimerManager().ClearTimer(RewindTimerHandle);
+
+	// Stop rewinding for all reversible actors
+	if(ABeatEmUpGameMode* GameMode = Cast<ABeatEmUpGameMode>(UGameplayStatics::GetGameMode(this)))
+		GameMode->RecordAllReversibleActors();
 }
 
 void ABeatEmUpCharacter::DealDamage(float Damage) {
@@ -498,6 +545,10 @@ void ABeatEmUpCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 		// Pausing the game
 		EnhancedInputComponent->BindAction(PauseAction, ETriggerEvent::Started, this, &ABeatEmUpCharacter::PauseGame);
+
+		// Rewinding time
+		EnhancedInputComponent->BindAction(RewindAction, ETriggerEvent::Started, this, &ABeatEmUpCharacter::ActivateRewind);
+		EnhancedInputComponent->BindAction(RewindAction, ETriggerEvent::Completed, this, &ABeatEmUpCharacter::StopRewind);
 	}
 	else {
 		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));

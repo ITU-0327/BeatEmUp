@@ -21,8 +21,10 @@ public:
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<AEnemy> EnemyClass;
 
-	void Load(UBeatEmUpSaveGame* LoadedGame);
-	void Save(UBeatEmUpSaveGame* SaveGame);
+	void RecordAllReversibleActors() const;
+	void RewindAllReversibleActors() const;
+	void Load(UBeatEmUpSaveGame* LoadedGame) const;
+	void Save(UBeatEmUpSaveGame* SaveGame) const;
 	UFUNCTION()
 		void PostBeginPlay();
 };
