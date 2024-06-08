@@ -14,7 +14,7 @@
 #include "Enemy.generated.h"
 
 UCLASS()
-class BEATEMUP_API AEnemy : public ACharacter
+class BEATEMUP_API AEnemy : public ACharacter, public IReversible
 {
 	GENERATED_BODY()
 
@@ -82,7 +82,15 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Materials")
 		float MaterialChangeFrequency = 3;
 	void UpdateMaterialBasedOnHealth();
+
+	// Rewind
+	TArray<FVector> RecordedLocations;
+	TArray<FRotator> RecordedRotations;
+	TArray<float> RecordedHealths;
+	int32 MaxRecordedStates = 500;
 	
+	virtual void RecordState() override;
+	virtual void RewindState() override;
 	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

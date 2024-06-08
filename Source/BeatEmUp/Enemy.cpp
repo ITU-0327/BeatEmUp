@@ -97,6 +97,26 @@ void AEnemy::Shoot(FVector Direction) {
 	SpawnedBullet->MovementComponent->Velocity = Direction * SpawnedBullet->MovementSpeed;
 }
 
+void AEnemy::RecordState() {	
+	RecordedLocations.Add(GetActorLocation());
+	RecordedRotations.Add(GetActorRotation());
+	RecordedHealths.Add(CurrentHealth);
+	
+	if (RecordedLocations.Num() > MaxRecordedStates) {
+		RecordedLocations.RemoveAt(0);
+		RecordedRotations.RemoveAt(0);
+		RecordedHealths.RemoveAt(0);
+	}
+}
+
+void AEnemy::RewindState() {
+	if (RecordedLocations.Num() > 0) {
+		SetActorLocation(RecordedLocations.Pop());
+		SetActorRotation(RecordedRotations.Pop());
+		CurrentHealth = RecordedHealths.Pop();
+	}
+}
+
 // Called every frame
 void AEnemy::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);

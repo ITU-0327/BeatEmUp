@@ -134,7 +134,7 @@ void ABeatEmUpCharacter::BeginPlay()
 	GetMesh()->SetMaterial(1, PlayerMaterialInstance02);
 
 	bIsRewinding = false;
-	GetWorld()->GetTimerManager().SetTimer(RecordingTimerHandle, this, &ABeatEmUpCharacter::RecordState, RecordingInterval, true);
+	GetWorld()->GetTimerManager().SetTimer(RecordingTimerHandle, this, &ABeatEmUpCharacter::NotifyRecordAll, RecordingInterval, true);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -263,25 +263,48 @@ void ABeatEmUpCharacter::UpdatePortalMaterial() {
 	PlayerMaterialInstance02->SetScalarParameterValue("Metal_Brightness", Brightness);
 }
 
+//////////////////////////////////////////////////////////////////////////
+// Rewind
 void ABeatEmUpCharacter::RecordState() {
-	if (bIsRewinding) return;
+	if(bIsRewinding) return;
 
-	if (RecordedLocations.Num() >= MaxRecordedStates) {
+	if(RecordedLocations.Num() >= MaxRecordedStates) {
 		RecordedLocations.RemoveAt(0);
 		RecordedRotations.RemoveAt(0);
+		RecordedHealths.RemoveAt(0);
 	}
 
 	RecordedLocations.Add(GetActorLocation());
 	RecordedRotations.Add(GetActorRotation());
+	RecordedHealths.Add(CurrentHealth);
 }
 
 void ABeatEmUpCharacter::RewindState() {
+	if(!bIsRewinding) return;
+	
 	if(RecordedLocations.Num() > 0) {
 		SetActorLocation(RecordedLocations.Pop());
 		SetActorRotation(RecordedRotations.Pop());
+		CurrentHealth = RecordedHealths.Pop();
 	}
 	else
 		StopRewind(); 
+}
+
+void ABeatEmUpCharacter::NotifyRewindAll() const {
+	if(!bIsRewinding) return;
+	
+	// Notify the game mode to rewind all reversible actors
+	if(ABeatEmUpGameMode* GameMode = Cast<ABeatEmUpGameMode>(UGameplayStatics::GetGameMode(this)))
+		GameMode->RewindAllReversibleActors();
+}
+
+void ABeatEmUpCharacter::NotifyRecordAll() {
+	if(bIsRewinding) return;
+	
+	// Stop rewinding for all reversible actors
+	if(ABeatEmUpGameMode* GameMode = Cast<ABeatEmUpGameMode>(UGameplayStatics::GetGameMode(this)))
+		GameMode->RecordAllReversibleActors();
 }
 
 void ABeatEmUpCharacter::ActivateRewind() {
@@ -289,21 +312,14 @@ void ABeatEmUpCharacter::ActivateRewind() {
 	if(RecordedLocations.Num() == 0) return;
 
 	bIsRewinding = true;
-	GetWorld()->GetTimerManager().SetTimer(RewindTimerHandle, this, &ABeatEmUpCharacter::RewindState, RecordingInterval, true);
-
-	// Notify the game mode to rewind all reversible actors
-	if(ABeatEmUpGameMode* GameMode = Cast<ABeatEmUpGameMode>(UGameplayStatics::GetGameMode(this)))
-		GameMode->RewindAllReversibleActors();
+	GetWorld()->GetTimerManager().SetTimer(RewindTimerHandle, this, &ABeatEmUpCharacter::NotifyRewindAll, RecordingInterval, true);
 }
+
 void ABeatEmUpCharacter::StopRewind() {
 	if(!bIsRewinding) return;
 
 	bIsRewinding = false;
 	GetWorld()->GetTimerManager().ClearTimer(RewindTimerHandle);
-
-	// Stop rewinding for all reversible actors
-	if(ABeatEmUpGameMode* GameMode = Cast<ABeatEmUpGameMode>(UGameplayStatics::GetGameMode(this)))
-		GameMode->RecordAllReversibleActors();
 }
 
 void ABeatEmUpCharacter::DealDamage(float Damage) {

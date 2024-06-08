@@ -241,6 +241,8 @@ public:
 	// Reversible Interface
 	virtual void RecordState() override;
 	virtual void RewindState() override;
+	void NotifyRewindAll() const;
+	void NotifyRecordAll();
 
 	// Reverse
 	UPROPERTY(EditAnywhere, Category="Reverse Settings")
