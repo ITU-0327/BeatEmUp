@@ -3,12 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Reversible.h"
 #include "Components/PointLightComponent.h"
 #include "GameFramework/Actor.h"
 #include "Grenade.generated.h"
 
 UCLASS()
-class BEATEMUP_API AGrenade : public AActor
+class BEATEMUP_API AGrenade : public AActor, public IReversible
 {
 	GENERATED_BODY()
 	
@@ -19,6 +20,8 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void RecordState() override;
+	virtual void RewindState() override;
 
 public:	
 	// Called every frame
@@ -48,6 +51,9 @@ public:
 		void Initialize(const FVector& ThrowDirection, bool bDebug);
 	UFUNCTION()
 		void Explode();
+
+	TArray<FVector> RecordedLocations;
+	TArray<FRotator> RecordedRotations;
 
 private:
 	FTimerHandle TimerHandle_Explosion;

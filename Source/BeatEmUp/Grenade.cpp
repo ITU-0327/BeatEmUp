@@ -33,6 +33,23 @@ void AGrenade::BeginPlay() {
 	FlashFrequency = 1.0f;
 }
 
+void AGrenade::RecordState() {
+	if(RecordedLocations.Num() >= 500) {
+		RecordedLocations.RemoveAt(0);
+		RecordedRotations.RemoveAt(0);
+	}
+
+	RecordedLocations.Add(GetActorLocation());
+	RecordedRotations.Add(GetActorRotation());
+}
+
+void AGrenade::RewindState() {
+	if(RecordedLocations.Num() > 0) {
+		SetActorLocation(RecordedLocations.Pop());
+		SetActorRotation(RecordedRotations.Pop());
+	}
+}
+
 // Called every frame
 void AGrenade::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
