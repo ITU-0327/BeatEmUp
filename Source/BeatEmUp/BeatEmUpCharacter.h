@@ -182,7 +182,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 		APortalSystem* ActivePortalSystem;
 	UPROPERTY(EditAnywhere, Category="Portal Settings")
-		float PortalRange = 3000.0f;
+		float PortalRange = 10000.0f;
 	UPROPERTY(EditAnywhere, Category="Portal Settings")
 		int SpeedMultiplier = 3;
 	int CurrentSpeedMultiplier = SpeedMultiplier;
