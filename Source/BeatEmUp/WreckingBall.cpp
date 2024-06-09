@@ -44,6 +44,23 @@ AWreckingBall::AWreckingBall() {
 	ConstraintComp->SetAngularTwistLimit(EAngularConstraintMotion::ACM_Free, 0);
 }
 
+void AWreckingBall::RecordState() {
+	if(RecordedLocations.Num() >= 500) {
+		RecordedLocations.RemoveAt(0);
+		RecordedRotations.RemoveAt(0);
+	}
+
+	RecordedLocations.Add(BallMesh->GetComponentLocation());
+	RecordedRotations.Add(BallMesh->GetComponentRotation());
+}
+
+void AWreckingBall::RewindState() {
+	if(RecordedLocations.Num() > 0) {
+		BallMesh->SetWorldLocation(RecordedLocations.Pop());
+		BallMesh->SetWorldRotation(RecordedRotations.Pop());
+	}
+}
+
 // Called when the game starts or when spawned
 void AWreckingBall::BeginPlay() {
 	Super::BeginPlay();

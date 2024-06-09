@@ -7,10 +7,11 @@
 #include "Components/StaticMeshComponent.h"
 #include "PhysicsEngine/PhysicsConstraintComponent.h"
 #include "CableComponent.h"
+#include "Reversible.h"
 #include "WreckingBall.generated.h"
 
 UCLASS()
-class BEATEMUP_API AWreckingBall : public AActor
+class BEATEMUP_API AWreckingBall : public AActor, public IReversible
 {
 	GENERATED_BODY()
 	
@@ -25,6 +26,8 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	virtual void RecordState() override;
+	virtual void RewindState() override;
 
 	UPROPERTY(EditAnywhere, Category = "Wrecking Ball")
 		UStaticMeshComponent* TopAnchor;
@@ -34,4 +37,7 @@ public:
 		UCableComponent* Cable;
 	UPROPERTY(EditAnywhere, Category = "Wrecking Ball")
 		UPhysicsConstraintComponent* ConstraintComp;
+
+	TArray<FVector> RecordedLocations;
+	TArray<FRotator> RecordedRotations;
 };
